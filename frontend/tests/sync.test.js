@@ -215,4 +215,103 @@ describe('Sync-Engine', () => {
     await p;
     await vi.waitFor(() => expect(gets).toBe(2));
   });
+
+  describe('Datenbestand-Kennung (data_id)', () => {
+    const seed = async () => {
+      const e = await repo.saveEntry(out({ item: 'Alt' }));
+      await db.tx(['outbox'], (t) => t.objectStore('outbox').clear());
+      await db.put('entries', { ...e, number: 1, version: 1 });
+      await db.setMeta('cursor', 40);
+      await db.setMeta('data_id', 'A');
+      return e;
+    };
+
+    it('abweichende data_id im GET: lokal verwerfen, since=0 neu laden, Token bleibt', async () => {
+      const old = await seed();
+      await repo.saveEntry(out({ item: 'Ungesendet' }));
+      const fresh = serverize({ ...old, id: 'neu-1', item: 'Neu' }, 1, 2);
+      const calls = mockFetch({
+        'POST /sync': (c) => ({ data_id: 'A', applied: c.body.entries.map((x) => serverize(x, 2, 41)), conflicts: [], cursor: 41 }),
+        'GET /sync': (c) => (c.query.since === '0' ? pull({ data_id: 'B', entries: [fresh], cursor: 2 }) : pull({ data_id: 'B', cursor: 2 })),
+      });
+      await engine({ canWrite: () => false }).sync();
+      const gets = calls.filter((c) => c.method === 'GET').map((c) => c.query.since);
+      expect(gets).toEqual(['40', '0']);
+      expect(await db.get('entries', old.id)).toBeUndefined();
+      expect((await db.get('entries', 'neu-1')).item).toBe('Neu');
+      expect(await db.getMeta('data_id')).toBe('B');
+      expect(await db.getMeta('cursor')).toBe(2);
+      expect(await db.count('outbox')).toBe(0);
+      expect(events).toContainEqual({ type: 'data_reset', discarded: 1 });
+      expect((await import('../src/api/index.js')).getToken()).toBe('tok-1'); // Token unberuehrt
+    });
+
+    it('409 data_reset beim Push: sendet data_id mit, verwirft, laedt ab 0 neu, Token bleibt', async () => {
+      const old = await seed();
+      await repo.saveEntry(out({ item: 'Ungesendet' }));
+      const { getToken } = await import('../src/api/index.js');
+      const calls = mockFetch({
+        'POST /sync': () => apiError(409, 'data_reset', { data_id: 'B' }),
+        'GET /sync': () => pull({ data_id: 'B', cursor: 3 }),
+      });
+      await engine().sync();
+      expect(calls.find((c) => c.method === 'POST').body.data_id).toBe('A');
+      expect(calls.filter((c) => c.method === 'GET').map((c) => c.query.since)).toEqual(['0']);
+      expect(await db.get('entries', old.id)).toBeUndefined();
+      expect(await db.count('outbox')).toBe(0);
+      expect(await db.getMeta('data_id')).toBe('B');
+      expect(getToken()).toBe('tok-1');
+      expect(events).toContainEqual({ type: 'data_reset', discarded: 1 });
+    });
+
+    it('gleiche data_id: nichts wird verworfen', async () => {
+      const old = await seed();
+      await repo.saveEntry(out({ item: 'Ungesendet' }));
+      mockFetch({
+        'POST /sync': (c) => ({ data_id: 'A', applied: c.body.entries.map((x) => serverize(x, 2, 41)), conflicts: [], cursor: 41 }),
+        'GET /sync': () => pull({ data_id: 'A', cursor: 41 }),
+      });
+      await engine().sync();
+      expect(await db.get('entries', old.id)).toBeTruthy();
+      expect(await db.count('entries')).toBe(2);
+      expect(await db.getMeta('cursor')).toBe(41);
+      expect(events.find((e) => e.type === 'data_reset')).toBeUndefined();
+    });
+
+    it('erster Abgleich ohne gemerkte data_id: uebernehmen, nichts verwerfen, kein data_id im Push', async () => {
+      const e = await repo.saveEntry(out());
+      const calls = mockFetch({
+        'POST /sync': (c) => ({ data_id: 'A', applied: c.body.entries.map((x) => serverize(x, 1, 6)), conflicts: [], cursor: 6 }),
+        'GET /sync': () => pull({ data_id: 'A', cursor: 6 }),
+      });
+      await engine().sync();
+      expect(calls.find((c) => c.method === 'POST').body).not.toHaveProperty('data_id');
+      expect(calls.filter((c) => c.method === 'GET')).toHaveLength(1);
+      expect(await db.get('entries', e.id)).toBeTruthy();
+      expect(await db.getMeta('data_id')).toBe('A');
+      expect(events.find((x) => x.type === 'data_reset')).toBeUndefined();
+    });
+
+    it('Altgeraet (cursor > 0, keine gemerkte data_id): einmal komplett neu laden', async () => {
+      const old = await seed();
+      await db.del('meta', 'data_id');
+      const calls = mockFetch({ 'GET /sync': (c) => pull({ data_id: 'A', cursor: 9 }) });
+      await engine().sync();
+      const gets = calls.filter((c) => c.method === 'GET');
+      expect(gets).toHaveLength(2);
+      expect(gets[1].query.since).toBe('0');
+      expect(await db.getMeta('data_id')).toBe('A');
+      expect(await db.getMeta('cursor')).toBe(9);
+      expect(await db.get('entries', old.id)).toBeFalsy();
+    });
+
+    it('resetAndSync verwirft alles und laedt ab since=0', async () => {
+      await seed();
+      const calls = mockFetch({ 'GET /sync': () => pull({ data_id: 'A', cursor: 9 }) });
+      await engine().resetAndSync();
+      expect(calls[0].query.since).toBe('0');
+      expect(await db.count('entries')).toBe(0);
+      expect(await db.getMeta('data_id')).toBe('A');
+    });
+  });
 });

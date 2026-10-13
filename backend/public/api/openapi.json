@@ -553,6 +553,11 @@
                                                 }
                                             }
                                         },
+                                        "data_id": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "description": "Kennung des Datenbestands; ändert sich bei jedem Ersetzen der Datenbank (Restore, Setup, Update-Rollback). Weicht sie vom gemerkten Wert ab: lokalen Stand verwerfen und mit since=0 neu laden."
+                                        },
                                         "cursor": {
                                             "type": "integer",
                                             "description": "Höchste Version; als nächstes since verwenden"
@@ -601,6 +606,11 @@
                                     "entries"
                                 ],
                                 "properties": {
+                                    "data_id": {
+                                        "type": "string",
+                                        "format": "uuid",
+                                        "description": "Optional. Kennung des Datenbestands aus dem letzten GET/POST; weicht sie vom Server ab, antwortet dieser mit 409 data_reset und übernimmt nichts."
+                                    },
                                     "entries": {
                                         "type": "array",
                                         "maxItems": 500,
@@ -627,6 +637,11 @@
                                         "cursor"
                                     ],
                                     "properties": {
+                                        "data_id": {
+                                            "type": "string",
+                                            "format": "uuid",
+                                            "description": "Kennung des Datenbestands"
+                                        },
                                         "applied": {
                                             "type": "array",
                                             "items": {
@@ -671,6 +686,16 @@
                     },
                     "403": {
                         "$ref": "#/components/responses/PinRequired"
+                    },
+                    "409": {
+                        "description": "Datenbestand wurde ersetzt – code data_reset, error.data_id = aktuelle Kennung",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationFailed"
@@ -1951,7 +1976,7 @@
                             "code": {
                                 "type": "string",
                                 "example": "validation_failed",
-                                "description": "snake_case, u. a. unauthorized, pin_required, validation_failed, not_found, not_in_trash, rate_limited, recognition_disabled, provider_error, docker_managed, not_installed, not_implemented, backup_too_new, update_failed, bad_request, internal_error"
+                                "description": "snake_case, u. a. unauthorized, pin_required, validation_failed, not_found, not_in_trash, data_reset, rate_limited, recognition_disabled, provider_error, docker_managed, not_installed, not_implemented, backup_too_new, update_failed, bad_request, internal_error"
                             },
                             "message": {
                                 "type": "string",
@@ -1966,6 +1991,11 @@
                             "retry_after": {
                                 "type": "integer",
                                 "description": "Nur bei rate_limited: Wartezeit in Sekunden"
+                            },
+                            "data_id": {
+                                "type": "string",
+                                "format": "uuid",
+                                "description": "Nur bei data_reset: aktuelle Kennung des Server-Datenbestands"
                             }
                         }
                     }

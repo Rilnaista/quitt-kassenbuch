@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use Quitt\App\Config;
 use Quitt\App\DataDir;
 use Quitt\Db\Database;
+use Quitt\Db\Meta;
 use Quitt\Db\Migrator;
 use Quitt\Http\ApiException;
 
@@ -89,6 +90,7 @@ class RestoreService
 
             $this->backup->autoBackup(BackupService::REASON_BEFORE_RESTORE);
             $this->swap($stage);
+            (new Meta($this->db))->regenerateDataId(); // nach dem Einspielen: Sicherung enthaelt ggf. die alte Kennung
             $this->log->info('restore completed', ['entries' => $entries, 'receipts' => $receiptCount]);
             return ['ok' => true, 'entries' => $entries, 'receipts' => $receiptCount];
         } catch (ApiException $e) {

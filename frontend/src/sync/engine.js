@@ -10,6 +10,11 @@
 //     noch nicht gesendete Fassung in der Outbox. purged -> lokal endgueltig entfernen.
 //     Cursor wird NUR aus GET /sync uebernommen (der POST-Cursor koennte fremde Aenderungen ueberspringen).
 //
+// Datenbestand-Kennung (data_id, meta): Weicht sie vom Server ab (GET/POST-Antwort) oder antwortet POST mit 409
+// data_reset, wurde der Server-Datenbestand ersetzt -> lokale Daten (entries, receipts, blobs, outbox, uploads, Cursor)
+// verwerfen und ab since=0 neu laden. Token und Geraete-Einstellungen liegen in localStorage und bleiben unberuehrt.
+// Erster Abgleich ohne gemerkte data_id: Kennung einfach uebernehmen.
+//
 // Schreiben ohne Token ist nicht moeglich (pin_required) -> dann nur lesen, Outbox bleibt erhalten.
 import * as db from '../db/index.js';
 import * as api from '../api/index.js';
@@ -69,6 +74,27 @@ export function createSyncEngine({ isOnline = () => globalThis.navigator?.onLine
     await t.objectStore('entries').put(server);
   }
 
+  /** Lokalen Datenstand verwerfen (Token/Einstellungen liegen in localStorage, nicht hier). newId = neue Kennung oder null. */
+  async function discardLocal(newId) {
+    const c = await pendingCounts();
+    if (c.pending) console.warn(`[sync] Datenbestand neu: ${c.pending} ungesendete Änderung(en) verworfen`);
+    await db.tx(['entries', 'receipts', 'blobs', 'outbox', 'uploads', 'meta'], async (t) => {
+      await Promise.all(['entries', 'receipts', 'blobs', 'outbox', 'uploads', 'meta'].map((s) => t.objectStore(s).clear()));
+      if (newId) await t.objectStore('meta').put({ key: 'data_id', value: newId });
+    });
+    onEvent({ type: 'data_reset', discarded: c.pending });
+  }
+
+  /** Antwort-Kennung pruefen: abweichend -> Fehler data_reset (Abbruch), erstmals -> merken. */
+  async function checkDataId(id) {
+    if (!id) return;
+    const stored = await db.getMeta('data_id', null);
+    if (!stored) {
+      // Altgeraet (vor REQ-073 schon synchronisiert): Kennung erst beim Pull festlegen (dort Vollabgleich)
+      if ((await db.getMeta('cursor', 0)) === 0) await db.setMeta('data_id', id);
+    } else if (stored !== id) throw Object.assign(new Error('data_reset'), { code: 'data_reset', status: 409, dataId: id });
+  }
+
   async function pushEntries() {
     const pendingUploads = new Set((await db.getAll('uploads')).map((u) => u.id));
     let queue = (await db.getAll('outbox')).filter((o) => !o._error && !(o.receipt_id && pendingUploads.has(o.receipt_id)));
@@ -76,7 +102,8 @@ export function createSyncEngine({ isOnline = () => globalThis.navigator?.onLine
       const batch = queue.slice(0, api.SYNC_PUSH_MAX);
       let res;
       try {
-        res = await api.syncPush(batch.map(strip));
+        res = await api.syncPush(batch.map(strip), await db.getMeta('data_id', null));
+        await checkDataId(res && res.data_id);
       } catch (e) {
         if (e.status === 422 && e.fields && typeof e.fields === 'object') {
           const bad = new Set(Object.keys(e.fields).filter((id) => batch.some((b) => b.id === id)));
@@ -119,7 +146,13 @@ export function createSyncEngine({ isOnline = () => globalThis.navigator?.onLine
 
   async function pull() {
     const since = await db.getMeta('cursor', 0);
-    const res = await api.syncPull(since);
+    let res = await api.syncPull(since);
+    const stored = await db.getMeta('data_id', null);
+    // Abweichende Kennung ODER Altgeraet ohne Kennung mit bisherigem Abgleich -> einmal komplett neu laden
+    if (res.data_id && (stored ? res.data_id !== stored : since > 0)) {
+      await discardLocal(res.data_id);
+      res = since === 0 ? res : await api.syncPull(0);
+    }
     await db.tx(['entries', 'receipts', 'blobs', 'outbox', 'uploads', 'meta'], async (t) => {
       const ob = t.objectStore('outbox');
       for (const e of res.entries || []) {
@@ -144,6 +177,7 @@ export function createSyncEngine({ isOnline = () => globalThis.navigator?.onLine
         await t.objectStore('uploads').delete(id);
       }
       if (typeof res.cursor === 'number') await t.objectStore('meta').put({ key: 'cursor', value: res.cursor });
+      if (res.data_id) await t.objectStore('meta').put({ key: 'data_id', value: res.data_id });
     });
   }
 
@@ -152,8 +186,13 @@ export function createSyncEngine({ isOnline = () => globalThis.navigator?.onLine
     emit({ state: 'syncing', error: null });
     try {
       if (canWrite()) {
-        await uploadReceipts();
-        await pushEntries();
+        try {
+          await uploadReceipts();
+          await pushEntries();
+        } catch (e) {
+          if (e && e.code === 'data_reset') await discardLocal(e.dataId || null);
+          else throw e;
+        }
       }
       await pull();
       emit({ lastSync: new Date().toISOString() });
@@ -178,5 +217,13 @@ export function createSyncEngine({ isOnline = () => globalThis.navigator?.onLine
     return running;
   }
 
-  return { sync, refreshStatus, get status() { return { ...status }; } };
+  /** Manuelles "Neu synchronisieren": lokalen Datenstand verwerfen und komplett neu laden (wartet auf laufenden Lauf). */
+  async function resetAndSync() {
+    if (running) await running;
+    await discardLocal(null);
+    onChange();
+    await sync();
+  }
+
+  return { sync, resetAndSync, refreshStatus, get status() { return { ...status }; } };
 }

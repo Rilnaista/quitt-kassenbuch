@@ -20,6 +20,12 @@
       <input ref="fileInput" type="file" accept=".zip,application/zip" hidden @change="picked" />
     </f7-block>
 
+    <f7-block-title>{{ $t('backup.resyncTitle') }}</f7-block-title>
+    <f7-block strong-ios inset>
+      <p>{{ $t('backup.resyncText') }}</p>
+      <f7-button tonal :disabled="busy" @click="resync"><f7-icon f7="arrow_2_circlepath" size="18" /> {{ $t('backup.resync') }}</f7-button>
+    </f7-block>
+
     <f7-block-title>{{ $t('backup.autoTitle') }}</f7-block-title>
     <f7-block-header>{{ $t('backup.autoText') }}</f7-block-header>
     <f7-block v-if="listError" class="text-color-red">{{ listError }}</f7-block>
@@ -80,6 +86,29 @@ function picked(ev) {
 }
 function back(b) {
   f7.dialog.confirm(t('backup.confirmBack', { d: fmtDateTime(b.created_at) }), t('backup.confirmTitle'), () => run(() => api.restoreBackup(b.name)));
+}
+
+// Neu synchronisieren: erst normal abgleichen; bleiben Aenderungen uebrig -> Rueckfrage; dann lokal verwerfen + Vollabgleich.
+// Aendert keine Serverdaten, daher auch ohne PIN erlaubt.
+async function resync() {
+  busy.value = true;
+  try {
+    await sync.syncNow();
+    if (!sync.online || sync.state === 'offline' || sync.state === 'error') { f7.dialog.alert(t('backup.resyncOffline'), t('backup.resyncTitle')); busy.value = false; return; }
+    if (sync.pending > 0) {
+      const text = sync.pending === 1 ? t('backup.resyncConfirmOne') : t('backup.resyncConfirm', { n: sync.pending });
+      f7.dialog.confirm(text, t('backup.resyncTitle'), () => doResync(), () => { busy.value = false; });
+    } else await doResync();
+  } catch (e) { busy.value = false; f7.dialog.alert(errorText(e), t('backup.resyncTitle')); }
+}
+async function doResync() {
+  busy.value = true;
+  try {
+    await sync.resetLocal();
+    await data.load();
+    if (sync.state === 'offline' || sync.state === 'error') f7.dialog.alert(t('backup.resyncOffline'), t('backup.resyncTitle'));
+    else f7.toast.create({ text: t('backup.resyncDone'), closeTimeout: 2000, position: 'center' }).open();
+  } catch (e) { f7.dialog.alert(errorText(e), t('backup.resyncTitle')); } finally { busy.value = false; }
 }
 
 // Nach dem Einspielen ersetzt der Server-Stand alles: lokalen Store leeren, Voll-Sync ab 0.

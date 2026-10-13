@@ -27,13 +27,43 @@ final class SyncApiTest extends ApiTestCase
         self::assertSame('Beitrag Müller', $d['applied'][1]['purpose']);
 
         $pull = $this->decode($this->request('GET', '/sync?since=0', null, $this->token));
-        self::assertSame(['entries', 'receipts', 'purged', 'cursor', 'server_time'], array_keys($pull));
+        self::assertSame(['data_id', 'entries', 'receipts', 'purged', 'cursor', 'server_time'], array_keys($pull));
         self::assertCount(2, $pull['entries']);
         self::assertSame(['entries' => [], 'receipts' => []], $pull['purged']);
         self::assertSame($d['cursor'], $pull['cursor']);
 
         $empty = $this->decode($this->request('GET', '/sync?since=' . $pull['cursor'], null, $this->token));
         self::assertSame([], $empty['entries']);
+    }
+
+    public function testDataIdStableAndChecked(): void
+    {
+        $a = $this->decode($this->request('GET', '/sync?since=0', null, $this->token))['data_id'];
+        self::assertTrue(\Quitt\Support\Uuid::isV4($a));
+        self::assertSame($a, $this->decode($this->request('GET', '/sync?since=0', null, $this->token))['data_id']);
+
+        $ok = $this->decode($this->request('POST', '/sync', ['data_id' => $a, 'entries' => [self::entry(1)]], $this->token));
+        self::assertSame($a, $ok['data_id']);
+        $noId = $this->request('POST', '/sync', ['entries' => [self::entry(2)]], $this->token);
+        self::assertSame(200, $noId->getStatusCode());
+
+        $r = $this->request('POST', '/sync', ['data_id' => self::uuid(7), 'entries' => [self::entry(3)]], $this->token);
+        $err = $this->assertError($r, 409, 'data_reset');
+        self::assertSame($a, $err['data_id']);
+        $pull = $this->decode($this->request('GET', '/sync?since=0', null, $this->token));
+        self::assertCount(2, $pull['entries'], 'bei data_reset nichts uebernommen');
+    }
+
+    public function testDataIdChangesAfterRestore(): void
+    {
+        $before = $this->decode($this->request('GET', '/sync?since=0', null, $this->token))['data_id'];
+        $bk = $this->c->get(\Quitt\Service\BackupService::class);
+        $bk->autoBackup('before_update');
+        $name = $this->decode($this->request('GET', '/backups', null, $this->token))[0]['name'];
+        self::assertSame(200, $this->request('POST', '/backups/' . $name . '/restore', null, $this->token)->getStatusCode());
+        $after = $this->decode($this->request('GET', '/sync?since=0', null, $this->token))['data_id'];
+        self::assertNotSame($before, $after);
+        $this->assertError($this->request('POST', '/sync', ['data_id' => $before, 'entries' => []], $this->token), 409, 'data_reset');
     }
 
     public function testValidationErrorsPerId(): void

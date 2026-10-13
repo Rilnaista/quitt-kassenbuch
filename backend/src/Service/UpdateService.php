@@ -7,6 +7,7 @@ namespace Quitt\Service;
 use Psr\Log\LoggerInterface;
 use Quitt\App\Config;
 use Quitt\Db\Database;
+use Quitt\Db\Meta;
 use Quitt\Db\Migrator;
 use Quitt\Http\ApiException;
 use Quitt\Support\Clock;
@@ -421,6 +422,12 @@ class UpdateService
         @unlink($file . '-shm');
         if (!@copy($copy, $file . '.rollback') || !@rename($file . '.rollback', $file)) {
             $this->log->critical('update: database rollback failed');
+            return;
+        }
+        try {
+            (new Meta($this->db))->regenerateDataId();
+        } catch (\Throwable $e) {
+            $this->log->error('update: data_id not renewed', ['exception' => $e]);
         }
     }
 

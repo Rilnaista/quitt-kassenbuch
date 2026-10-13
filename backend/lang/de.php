@@ -20,6 +20,7 @@ return [
     'error.provider_error' => 'Der KI-Dienst hat einen Fehler gemeldet.',
     'error.docker_managed' => 'Diese Installation läuft in Docker und wird über ein neues Image aktualisiert.',
     'error.not_installed' => 'Quitt ist noch nicht eingerichtet.',
+    'error.data_reset' => 'Der Datenbestand auf dem Server wurde neu eingerichtet. Die App lädt alles neu.',
     'error.not_in_trash' => 'Die Buchung liegt nicht im Papierkorb.',
     'error.method_not_allowed' => 'Diese Aktion ist hier nicht erlaubt.',
     'error.bad_request' => 'Die Anfrage ist ungültig.',

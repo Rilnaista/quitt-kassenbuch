@@ -7,6 +7,7 @@ namespace Quitt\Service;
 use Psr\Log\LoggerInterface;
 use Quitt\App\Config;
 use Quitt\Db\Database;
+use Quitt\Db\Meta;
 use Quitt\Db\Sequences;
 use Quitt\Http\ApiException;
 use Quitt\Support\Clock;
@@ -82,6 +83,7 @@ final class SyncService
             $pdo->commit();
         }
         return [
+            'data_id' => (new Meta($this->db))->dataId(),
             'entries' => $entries,
             'receipts' => $receipts,
             'purged' => $purged,
@@ -92,10 +94,15 @@ final class SyncService
 
     /**
      * @param array<string, mixed> $payload { entries: [...] }
-     * @return array{applied: list<array>, conflicts: list<array{id: string, server: array}>, cursor: int}
+     * @return array{data_id: string, applied: list<array>, conflicts: list<array{id: string, server: array}>, cursor: int}
      */
     public function apply(array $payload): array
     {
+        $dataId = (new Meta($this->db))->dataId();
+        $client = $payload['data_id'] ?? null;
+        if ($client !== null && (!is_string($client) || $client !== $dataId)) {
+            throw new ApiException(409, 'data_reset', null, ['data_id' => $dataId]);
+        }
         $list = $payload['entries'] ?? null;
         if (!is_array($list) || ($list !== [] && !array_is_list($list))) {
             throw ApiException::validation(['entries' => 'validation.list']);
@@ -123,7 +130,7 @@ final class SyncService
         // Neue Buchungen erhalten Nummern in der Reihenfolge ihres Anlegens.
         usort($clean, static fn ($a, $b) => [$a['e']['created_at'], $a['i']] <=> [$b['e']['created_at'], $b['i']]);
 
-        $result = $this->db->transaction(function () use ($clean): array {
+        $result = $this->db->transaction(function () use ($clean, $dataId): array {
             $applied = [];
             $conflicts = [];
             $touchedReceipts = [];
@@ -172,6 +179,7 @@ final class SyncService
             }
             $this->receipts->refreshTrashState(array_values(array_filter($touchedReceipts)));
             return [
+                'data_id' => $dataId,
                 'applied' => array_values($applied),
                 'conflicts' => array_values($conflicts),
                 'cursor' => $this->seq->current(Sequences::VERSION),

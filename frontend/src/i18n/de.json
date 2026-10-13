@@ -44,6 +44,7 @@
     "retry": "Erneut prüfen"
   },
   "sync": {
+    "dataReset": "Der Datenbestand auf dem Server wurde neu eingerichtet – Quitt hat alles neu geladen.",
     "offline": "Offline – Änderungen werden später übertragen",
     "offlinePending": "Offline – {n} Änderungen ausstehend",
     "syncing": "Synchronisiere …",

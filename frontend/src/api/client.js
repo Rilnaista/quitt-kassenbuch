@@ -28,13 +28,14 @@ export function onAuthProblem(fn) {
 }
 
 export class ApiError extends Error {
-  constructor({ status = 0, code = 'unknown', message = '', fields = null, retryAfter = null } = {}) {
+  constructor({ status = 0, code = 'unknown', message = '', fields = null, retryAfter = null, dataId = null } = {}) {
     super(message || code);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
     this.fields = fields;
     this.retryAfter = retryAfter;
+    this.dataId = dataId; // nur bei 409 data_reset: neue Datenbestand-Kennung des Servers
   }
   get isNetwork() { return this.code === 'network'; }
 }
@@ -88,6 +89,7 @@ export async function request(method, path, opts = {}) {
     message: err.message || '',
     fields: err.fields || null,
     retryAfter: ra,
+    dataId: err.data_id || null,
   });
   if (res.status === 401 && token && !opts.keepTokenOn401) {
     clearToken();

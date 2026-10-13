@@ -25,7 +25,7 @@ export const resetPin = ({ recoveryCode, newPin }) =>
 export const syncPull = (since = 0) => request('GET', '/sync', { query: { since } });
 /** entries ohne number/version, max. 500 je Aufruf (Vertrag). */
 export const SYNC_PUSH_MAX = 500;
-export const syncPush = (entries) => request('POST', '/sync', { json: { entries } });
+export const syncPush = (entries, dataId = null) => request('POST', '/sync', { json: dataId ? { data_id: dataId, entries } : { entries } });
 
 // --- Papierkorb ---
 export const deleteEntry = (id) => request('DELETE', `/entries/${enc(id)}`);
