@@ -12,11 +12,11 @@ export const useUpdate = defineStore('update', {
       const res = await silentCheck(() => api.updateCheck());
       if (res) { this.info = res; this.latest = res.available && !res.docker ? res.latest : null; }
     },
-    /** Ausdrueckliche Pruefung (wirft ApiError). */
+    /** Ausdrueckliche Pruefung (Knopf "Nach Update suchen", umgeht den Cache; wirft ApiError). */
     async check() {
       this.checking = true;
       try {
-        const res = await api.updateCheck();
+        const res = await api.updateCheck(true);
         this.info = res;
         this.latest = res.available && !res.docker ? res.latest : null;
         markChecked(Date.now());

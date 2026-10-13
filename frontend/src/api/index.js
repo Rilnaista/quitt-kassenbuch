@@ -77,7 +77,7 @@ export function restore(file) {
 }
 export const listBackups = () => request('GET', '/backups');
 export const restoreBackup = (name) => request('POST', `/backups/${enc(name)}/restore`);
-export const updateCheck = () => request('GET', '/update/check');
+export const updateCheck = (force = false) => request('GET', '/update/check', { query: { force: force ? 1 : undefined } });
 export const updateApply = () => request('POST', '/update/apply');
 export const logs = ({ level, limit } = {}) => request('GET', '/logs', { query: { level, limit } });
 export const diagnostics = () => request('GET', '/diagnostics');

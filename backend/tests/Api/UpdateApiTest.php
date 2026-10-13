@@ -41,6 +41,30 @@ final class UpdateApiTest extends ApiTestCase
         self::assertTrue($d['available']);
     }
 
+    public function testForceQueryBypassesCache(): void
+    {
+        $this->install();
+        // altes Ergebnis (1 h alt, also noch innerhalb der 6 h) im Cache
+        file_put_contents($this->c->get(\Quitt\App\Config::class)->path('update-check.json'), json_encode([
+            'checked_at' => $this->clock->now()->getTimestamp() - 3600, 'error' => false,
+            'release' => ['version' => '99.0.0', 'notes' => 'alt', 'published_at' => '2026-10-01T00:00:00Z'],
+        ]));
+        $this->http->on('https://api.github.com/repos/Rilnaista/quitt-kassenbuch/releases?per_page=30', 200, [[
+            'tag_name' => 'v99.0.1-rc1', 'prerelease' => true, 'body' => 'frisch', 'published_at' => '2026-10-12T10:00:00Z',
+            'assets' => [
+                ['name' => 'quitt-99.0.1-rc1.zip', 'browser_download_url' => 'https://example.invalid/q.zip'],
+                ['name' => 'quitt-99.0.1-rc1.zip.sha256', 'browser_download_url' => 'https://example.invalid/q.zip.sha256'],
+            ],
+        ]]);
+        $cached = $this->decode($this->request('GET', '/update/check', null, $this->login()));
+        self::assertSame('99.0.0', $cached['latest']);
+        self::assertSame([], $this->http->calls, 'ohne force kein Abruf');
+
+        $fresh = $this->decode($this->request('GET', '/update/check?force=1', null, $this->login()));
+        self::assertSame('99.0.1-rc1', $fresh['latest']);
+        self::assertCount(1, $this->http->calls, 'force=1 umgeht den Cache');
+    }
+
     public function testApplyNeedsPinAndFailsOutsideReleaseLayout(): void
     {
         $this->install();

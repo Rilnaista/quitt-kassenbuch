@@ -1598,7 +1598,18 @@
                     "Update"
                 ],
                 "summary": "Nach neuer Fassung suchen",
-                "description": "Quelle: GitHub Releases des Repos aus der Konfiguration (`update_repo`), inkl. Pre-Releases. Ergebnis 6 h gecacht (Fehler 30 min). Fehler beim Abruf bleiben still: `available: false`, `latest: null`, Eintrag im Protokoll. Nur angemeldet (Token).",
+                "description": "Quelle: GitHub Releases des Repos aus der Konfiguration (`update_repo`), inkl. Pre-Releases. Ergebnis 6 h gecacht (Fehler 30 min). `force=1` umgeht den Cache (nur beim Knopf \"Nach Update suchen\"). Fehler beim Abruf bleiben still: `available: false`, `latest: null`, Eintrag im Protokoll. Nur angemeldet (Token).",
+                "parameters": [
+                    {
+                        "name": "force",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "1 bzw. true = Cache umgehen und frisch bei GitHub abfragen"
+                    }
+                ],
                 "security": [
                     {
                         "bearerAuth": []

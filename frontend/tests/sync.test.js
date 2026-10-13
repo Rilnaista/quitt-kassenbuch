@@ -186,8 +186,8 @@ describe('Sync-Engine', () => {
     await repo.trashEntry(e.id);
     let sent;
     mockFetch({
-      'POST /sync': (c) => { sent = c.body.entries[0]; return { applied: c.body.entries.map((x) => serverize(x, 1, 2)), conflicts: [], cursor: 2 }; },
-      'GET /sync': () => pull({ cursor: 2 }),
+      'POST /sync': (c) => { sent = c.body.entries[0]; return { data_id: 'A', applied: c.body.entries.map((x) => serverize(x, 1, 2)), conflicts: [], cursor: 2 }; },
+      'GET /sync': () => pull({ data_id: 'A', cursor: 2 }),
     });
     await engine().sync();
     expect(sent.deleted_at).toBeTruthy();
@@ -303,6 +303,47 @@ describe('Sync-Engine', () => {
       expect(await db.getMeta('data_id')).toBe('A');
       expect(await db.getMeta('cursor')).toBe(9);
       expect(await db.get('entries', old.id)).toBeFalsy();
+    });
+
+    it('Upload/Push-Fehler (422/500) verhindert den Pull nicht; data_id-Wechsel wird erkannt', async () => {
+      const old = await seed();
+      await repo.saveEntry(out({ item: 'Ungesendet' }));
+      mockFetch({
+        'POST /sync': () => apiError(500, 'server_error'),
+        'GET /sync': (c) => (c.query.since === '0' ? pull({ data_id: 'B', cursor: 2 }) : pull({ data_id: 'B', cursor: 2 })),
+      });
+      await engine().sync();
+      expect(await db.get('entries', old.id)).toBeUndefined();
+      expect(await db.getMeta('data_id')).toBe('B');
+      expect(events).toContainEqual({ type: 'data_reset', discarded: 1 });
+    });
+
+    it('Sendefehler wird nach dem Pull als Status error gemeldet', async () => {
+      await seed();
+      await repo.saveEntry(out({ item: 'Ungesendet' }));
+      const calls = mockFetch({
+        'POST /sync': () => apiError(500, 'server_error'),
+        'GET /sync': () => pull({ data_id: 'A', cursor: 41 }),
+      });
+      const eng = engine();
+      await eng.sync();
+      expect(calls.some((c) => c.method === 'GET')).toBe(true);
+      expect(eng.status.state).toBe('error');
+    });
+
+    it('Altgeraet mit Outbox und cursor>0 ohne data_id: nichts senden, zuerst pull, Stand verworfen', async () => {
+      await seed();
+      await db.del('meta', 'data_id');
+      await repo.saveEntry(out({ item: 'Ungesendet' }));
+      await db.put('blobs', { id: 'r1', blob: new Blob(['x']), mime: 'image/jpeg' });
+      await db.put('uploads', { id: 'r1', mime: 'image/jpeg' });
+      const calls = mockFetch({ 'GET /sync': () => pull({ data_id: 'N', cursor: 1 }) });
+      await engine().sync();
+      expect(calls.filter((c) => c.method !== 'GET')).toHaveLength(0);
+      expect(calls.filter((c) => c.method === 'GET').length).toBeGreaterThan(0);
+      expect(await db.count('outbox')).toBe(0);
+      expect(await db.count('uploads')).toBe(0);
+      expect(await db.getMeta('data_id')).toBe('N');
     });
 
     it('resetAndSync verwirft alles und laedt ab since=0', async () => {

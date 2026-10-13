@@ -13,7 +13,8 @@ final class UpdateController extends Controller
 {
     public function check(Request $request, Response $response): Response
     {
-        return $this->json($response, $this->svc(UpdateService::class)->check());
+        $force = in_array(strtolower((string) ($request->getQueryParams()['force'] ?? '')), ['1', 'true'], true);
+        return $this->json($response, $this->svc(UpdateService::class)->check($force));
     }
 
     public function apply(Request $request, Response $response): Response

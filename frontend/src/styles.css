@@ -10,6 +10,15 @@ html.amt-cb.dark { --q-in: #7ab8ff; --q-out: #ffb74d; }
 html.amt-icons .amt-in, html.amt-icons .amt-out { color: inherit; }
 html.amt-icons .bk-in .item-content,
 html.amt-icons .bk-in.item-content { background: color-mix(in srgb, var(--f7-theme-color) 12%, transparent); }
+/* Vorschau je Schema in den Einstellungen (unabhaengig vom aktiven Schema) */
+.amt-prev-classic { --q-in: #1b7a3e; --q-out: #c62828; }
+html.dark .amt-prev-classic { --q-in: #5fd08a; --q-out: #ff8a80; }
+.amt-prev-cb { --q-in: #1565c0; --q-out: #b34700; }
+html.dark .amt-prev-cb { --q-in: #7ab8ff; --q-out: #ffb74d; }
+html .amt-prev-classic .amt-in, html .amt-prev-cb .amt-in { color: var(--q-in); }
+html .amt-prev-classic .amt-out, html .amt-prev-cb .amt-out { color: var(--q-out); }
+html .amt-prev-icons .amt-in, html .amt-prev-icons .amt-out { color: inherit; }
+html .amt-prev-icons .amt-in { background: color-mix(in srgb, var(--f7-theme-color) 12%, transparent); border-radius: 6px; padding: 0 4px; }
 .amt-lg { font-size: 15px; }
 .sub-small { font-size: 12px; opacity: 0.7; }
 

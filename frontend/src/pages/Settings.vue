@@ -30,7 +30,7 @@
     <f7-list strong-ios inset>
       <f7-list-item v-for="s in AMOUNT_SCHEMES" :key="s" radio radio-icon="start" name="scheme" :value="s" :checked="look.amountScheme === s" :title="$t('settings.scheme.' + s)" @change="look.set('amountScheme', s)">
         <template #footer>
-          <span style="display:flex;gap:16px;margin-top:4px"><Amount type="in" :cents="1250" /><Amount type="out" :cents="790" /></span>
+          <span :class="'amt-prev amt-prev-' + s" style="display:flex;gap:16px;margin-top:4px"><Amount type="in" :cents="1250" /><Amount type="out" :cents="790" /></span>
         </template>
       </f7-list-item>
     </f7-list>

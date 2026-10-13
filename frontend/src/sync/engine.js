@@ -185,16 +185,21 @@ export function createSyncEngine({ isOnline = () => globalThis.navigator?.onLine
     if (!isOnline()) { await refreshStatus('offline'); return; }
     emit({ state: 'syncing', error: null });
     try {
-      if (canWrite()) {
+      let sendError = null;
+      // Altgeraet (Cursor, aber keine data_id): nicht in einen unbekannten Datenbestand senden, zuerst pull()
+      const unknownStore = !(await db.getMeta('data_id', null)) && (await db.getMeta('cursor', 0)) > 0;
+      if (canWrite() && !unknownStore) {
         try {
           await uploadReceipts();
           await pushEntries();
         } catch (e) {
           if (e && e.code === 'data_reset') await discardLocal(e.dataId || null);
-          else throw e;
+          else if (e && e.code === 'network') throw e;
+          else sendError = e; // Sendefehler darf den Pull nicht verhindern
         }
       }
       await pull();
+      if (sendError) throw sendError;
       emit({ lastSync: new Date().toISOString() });
       onChange();
       await refreshStatus();
