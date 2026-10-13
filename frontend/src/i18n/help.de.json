@@ -51,7 +51,7 @@
       },
       "offline": {
         "q": "Offline & Synchronisieren",
-        "a": "Lesen und Buchen gehen auch ohne Netz. Deine Änderungen warten auf dem Gerät und werden übertragen, sobald wieder eine Verbindung besteht. Der Streifen auf der Übersicht zeigt dir den Stand.\n\nWird dieselbe Buchung auf zwei Geräten geändert, gilt die zuletzt geänderte. Beleg-Erkennung per KI, Papierkorb leeren, Sicherung und Update brauchen eine Verbindung.\n\nZeigt Quitt veraltete Daten, tippe unter „Einstellungen > Datensicherung“ auf „Neu synchronisieren“. Dann lädt das Gerät alles frisch vom Server."
+        "a": "Lesen und Buchen gehen auch ohne Netz. Deine Änderungen warten auf dem Gerät und werden übertragen, sobald wieder eine Verbindung besteht. Das Symbol oben rechts zeigt dir den Stand.\n\nWird dieselbe Buchung auf zwei Geräten geändert, gilt die zuletzt geänderte. Beleg-Erkennung per KI, Papierkorb leeren, Sicherung und Update brauchen eine Verbindung.\n\nZeigt Quitt veraltete Daten, tippe unter „Einstellungen > Datensicherung“ auf „Daten vom Server neu laden“. Das Gerät verwirft dann seinen Stand und lädt alles frisch vom Server – nicht übertragene Änderungen dieses Geräts gehen dabei verloren (Quitt fragt vorher nach)."
       },
       "homescreen": {
         "q": "App auf den Home-Bildschirm legen",

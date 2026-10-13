@@ -37,12 +37,12 @@
     "confirmBack": "Alle aktuellen Daten werden durch den Stand vom {d} ersetzt. Nicht übertragene Änderungen auf diesem Gerät gehen verloren. Wirklich zurückgehen?",
     "reason": { "manual": "Manuell", "before_update": "Vor einem Update", "before_restore": "Vor dem Einspielen", "before_migration": "Vor einer Migration" },
     "loadError": "Die Liste konnte nicht geladen werden.",
-    "resyncTitle": "Neu synchronisieren",
-    "resyncText": "Lädt alle Daten dieses Geräts neu vom Server. Hilfreich, wenn Quitt veraltete Daten zeigt, etwa nachdem der Server neu eingerichtet wurde. Zuerst überträgt Quitt noch offene Änderungen. Deine PIN-Entsperrung und Darstellung bleiben erhalten.",
-    "resync": "Neu synchronisieren …",
-    "resyncOffline": "Zum Neu-Synchronisieren braucht Quitt eine Verbindung zum Server. Du bist gerade offline oder der Server ist nicht erreichbar. Es wurde nichts verändert.",
-    "resyncConfirm": "{n} Änderungen auf diesem Gerät konnten nicht übertragen werden und gehen verloren, wenn du neu synchronisierst. Wirklich neu synchronisieren?",
-    "resyncConfirmOne": "1 Änderung auf diesem Gerät konnte nicht übertragen werden und geht verloren, wenn du neu synchronisierst. Wirklich neu synchronisieren?",
+    "resyncTitle": "Daten vom Server neu laden",
+    "resyncText": "Verwirft den Stand auf diesem Gerät und lädt alles neu vom Server. Hilfreich, wenn Quitt veraltete Daten zeigt, etwa nachdem der Server neu eingerichtet wurde. Achtung: Was nur auf diesem Gerät liegt und nicht übertragen werden kann, geht dabei verloren – Quitt versucht vorher noch zu senden und fragt nach, falls etwas übrig bleibt. PIN-Entsperrung und Darstellung bleiben erhalten.",
+    "resync": "Daten vom Server neu laden …",
+    "resyncOffline": "Zum Neuladen braucht Quitt eine Verbindung zum Server. Du bist gerade offline oder der Server ist nicht erreichbar. Es wurde nichts verändert.",
+    "resyncConfirm": "{n} Änderungen auf diesem Gerät konnten nicht übertragen werden und gehen dabei verloren. Trotzdem alles vom Server neu laden?",
+    "resyncConfirmOne": "1 Änderung auf diesem Gerät konnte nicht übertragen werden und geht dabei verloren. Trotzdem alles vom Server neu laden?",
     "resyncDone": "Alles neu geladen."
   },
   "upd": {
