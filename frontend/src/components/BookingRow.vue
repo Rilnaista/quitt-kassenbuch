@@ -7,6 +7,7 @@
         <f7-icon v-if="data.rejected[e.id]" f7="exclamationmark_triangle" size="13" color="red" :aria-label="$t('sync.rejectedOne')" />
         <f7-icon v-else-if="isPending" f7="arrow_2_circlepath" size="13" :aria-label="$t('sync.pendingOne')" />
       </span>
+      <span v-if="e.note" class="bk-note">{{ e.note }}</span>
     </template>
     <f7-swipeout-actions v-if="swipeable" right>
       <f7-swipeout-button close color="blue" @click="$emit('edit', e)">{{ $t('common.edit') }}</f7-swipeout-button>

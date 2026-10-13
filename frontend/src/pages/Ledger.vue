@@ -11,10 +11,26 @@
       </f7-subnavbar>
     </f7-navbar>
 
-    <f7-list v-if="rows.length" media-list class="bk-list" strong-ios outline-ios>
-      <BookingRow v-for="e in rows" :key="e.id" :e="e" swipe show-balance @open="open" @edit="edit" @remove="remove" />
-    </f7-list>
-    <f7-block v-else class="text-align-center">{{ $t('ledger.empty') }}</f7-block>
+    <template v-if="rows.length">
+      <section v-for="g in groups" :key="g.key" class="month-group">
+        <div class="month-head">
+          <h2>{{ g.label }}</h2>
+          <div class="month-sums">
+            <span>{{ $t('ledger.monthIn') }} +{{ fmtEur(g.in) }}</span>
+            <span>{{ $t('ledger.monthOut') }} −{{ fmtEur(g.out) }}</span>
+          </div>
+        </div>
+        <f7-list media-list class="bk-list" strong-ios outline-ios>
+          <BookingRow v-for="e in g.rows" :key="e.id" :e="e" swipe show-balance @open="open" @edit="edit" @remove="remove" />
+        </f7-list>
+      </section>
+    </template>
+    <EmptyState v-else-if="activeFilters || q.trim()" icon="search" :text="$t('empty.noMatch')">
+      <f7-button tonal @click="resetAll">{{ $t('empty.resetFilter') }}</f7-button>
+    </EmptyState>
+    <EmptyState v-else :text="$t('empty.ledger')">
+      <f7-button v-if="session.canEdit" tonal @click="ui.addOpen = true">{{ $t('home.firstBooking') }}</f7-button>
+    </EmptyState>
     <div style="height:90px"></div>
 
     <f7-sheet :opened="sheet" style="height:auto" swipe-to-close backdrop @sheet:closed="sheet = false">
@@ -51,12 +67,15 @@ import LockButton from '../components/LockButton.vue';
 import HelpButton from '../components/HelpButton.vue';
 import { useData } from '../stores/data.js';
 import { useSession } from '../stores/session.js';
-import { filterLedger } from '../lib/ledger.js';
-import { t } from '../i18n/index.js';
+import EmptyState from '../components/EmptyState.vue';
+import { useUi } from '../stores/ui.js';
+import { filterLedger, groupByMonth } from '../lib/ledger.js';
+import { t, fmtEur } from '../i18n/index.js';
 
 const props = defineProps({ f7router: Object });
 const data = useData();
 const session = useSession();
+const ui = useUi();
 const q = ref(''); const sheet = ref(false);
 const fType = ref(''); const fCategory = ref(''); const fReason = ref('');
 const activeFilters = computed(() => [fType, fCategory, fReason].filter((f) => f.value).length);
@@ -65,6 +84,8 @@ const categoryNames = computed(() => [...data.categoryOptions].sort(byName));
 const reasonNames = computed(() => [...data.reasonOptions].sort(byName));
 // neueste oben; laufender Saldo bleibt der chronologische (auch bei aktivem Filter)
 const rows = computed(() => filterLedger(data.ledger, { q: q.value, type: fType.value, category: fCategory.value, reason: fReason.value }).reverse());
+const groups = computed(() => groupByMonth(rows.value));
+const resetAll = () => { reset(); q.value = ''; const sb = document.querySelector('.page-current .searchbar input'); if (sb) sb.value = ''; };
 const reset = () => { fType.value = ''; fCategory.value = ''; fReason.value = ''; };
 const open = (e) => props.f7router.navigate(`/buchungen/${e.id}/`);
 const edit = (e) => props.f7router.navigate(`/bearbeiten/${e.id}/`);

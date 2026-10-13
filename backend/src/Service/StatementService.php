@@ -52,11 +52,7 @@ final class StatementService
     public function build(string $from, string $to): array
     {
         $this->validateRange($from, $to);
-        $opening = (int) $this->db->scalar(
-            "SELECT COALESCE(SUM(CASE type WHEN 'in' THEN amount_cents ELSE -amount_cents END), 0)
-             FROM entries WHERE deleted_at IS NULL AND date < ?",
-            [$from]
-        );
+        $opening = $this->opening($from);
         $rows = $this->db->all(
             'SELECT number, type, date, amount_cents, purpose, reason, category, item
              FROM entries WHERE deleted_at IS NULL AND date >= ? AND date <= ? ORDER BY date, number',
@@ -86,6 +82,38 @@ final class StatementService
             'closing' => $result['closing'],
             'pages' => $result['pages'],
         ];
+    }
+
+    /**
+     * Buchungen des Zeitraums mit laufendem Saldo (gleiche Auswahl und Anfangssaldo wie build(), ohne Seitenumbruch).
+     * @return array{opening: int, closing: int, rows: list<array<string, mixed>>}
+     */
+    public function ledger(string $from, string $to): array
+    {
+        $this->validateRange($from, $to);
+        $opening = $this->opening($from);
+        $rows = $this->db->all(
+            'SELECT number, type, date, amount_cents, purpose, reason, category, item, note, receipt_id
+             FROM entries WHERE deleted_at IS NULL AND date >= ? AND date <= ? ORDER BY date, number',
+            [$from, $to]
+        );
+        $balance = $opening;
+        foreach ($rows as &$row) {
+            $balance += $row['type'] === 'in' ? (int) $row['amount_cents'] : -(int) $row['amount_cents'];
+            $row['balance'] = $balance;
+        }
+        unset($row);
+        return ['opening' => $opening, 'closing' => $balance, 'rows' => $rows];
+    }
+
+    /** Saldo vor $from in Cent (Papierkorb zaehlt nicht). */
+    public function opening(string $from): int
+    {
+        return (int) $this->db->scalar(
+            "SELECT COALESCE(SUM(CASE type WHEN 'in' THEN amount_cents ELSE -amount_cents END), 0)
+             FROM entries WHERE deleted_at IS NULL AND date < ?",
+            [$from]
+        );
     }
 
     public function render(string $from, string $to): string

@@ -78,3 +78,37 @@ describe('Buchung validieren/normalisieren', () => {
     expect(n).toMatchObject({ purpose: 'Sammlung', reason: null, category: null, item: null, receipt_id: null });
   });
 });
+
+import { groupByMonth, percentShares } from '../src/lib/ledger.js';
+describe('REQ-074 Monatsgruppen / REQ-077 Prozent', () => {
+  it('zwei Monate, Summen Ein/Aus, neueste oben', () => {
+    const rows = buildLedger(sample).reverse();
+    const g = groupByMonth(rows);
+    expect(g.map((x) => x.label)).toEqual(['März 2026', 'Februar 2026', 'Januar 2026']);
+    expect(g[1]).toMatchObject({ in: 0, out: 2840 });
+    expect(g[2]).toMatchObject({ in: 19120, out: 0 });
+    expect(g[2].rows).toHaveLength(2);
+  });
+  it('Summen ueber gefilterte Zeilen', () => {
+    const g = groupByMonth(filterLedger(buildLedger(sample), { type: 'out' }).reverse());
+    expect(g.map((x) => [x.key, x.in, x.out])).toEqual([['2026-03', 0, 1140], ['2026-02', 0, 2840]]);
+  });
+  it('Prozent: Summe immer 100', () => {
+    expect(percentShares([1, 1, 1])).toEqual([34, 33, 33]);
+    expect(percentShares([5000, 3000, 2000])).toEqual([50, 30, 20]);
+    for (const v of [[1, 2, 3, 4, 5, 6, 7], [999, 1], [1]]) expect(percentShares(v).reduce((a, b) => a + b, 0)).toBe(100);
+    expect(percentShares([0, 0])).toEqual([0, 0]);
+  });
+});
+
+describe('REQ-076/079 Verwendungszweck-Vorschlaege und Notiz', () => {
+  it('suggestions liefert bisherige purpose-Werte', () => {
+    const s = suggestions([{ purpose: 'Biberburg' }, { purpose: 'Biberburg' }, { purpose: 'Sammlung' }, { purpose: null }], 'purpose');
+    expect(s).toEqual(['Biberburg', 'Sammlung']);
+  });
+  it('note wird normalisiert und auf 100 Zeichen geprueft', () => {
+    expect(normalizeEntry({ id: '1', type: 'out', date: '2026-01-01', amount_cents: 5, note: '  hallo ' }).note).toBe('hallo');
+    expect(normalizeEntry({ id: '1', type: 'in', date: '2026-01-01', amount_cents: 5, note: ' ' }).note).toBeNull();
+    expect(validateEntry({ type: 'in', date: '2026-01-01', amount_cents: 100, purpose: 'x', note: 'a'.repeat(101) })).toEqual({ note: 'form.errNote' });
+  });
+});

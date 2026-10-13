@@ -23,9 +23,10 @@ use Quitt\Support\Uuid;
 final class SyncService
 {
     public const TEXT_MAX = 200;
+    public const NOTE_MAX = 100;
     public const AMOUNT_MAX = 10_000_000_000; // 100 Mio. EUR in Cent
 
-    private const CONTENT_FIELDS = ['type', 'date', 'amount_cents', 'purpose', 'reason', 'category', 'item', 'receipt_id', 'updated_at', 'deleted_at'];
+    private const CONTENT_FIELDS = ['type', 'date', 'amount_cents', 'purpose', 'reason', 'category', 'item', 'note', 'receipt_id', 'updated_at', 'deleted_at'];
 
     public function __construct(
         private readonly Database $db,
@@ -51,6 +52,7 @@ final class SyncService
             'reason' => $nullable($row['reason']),
             'category' => $nullable($row['category']),
             'item' => $nullable($row['item']),
+            'note' => $nullable($row['note'] ?? null),
             'receipt_id' => $nullable($row['receipt_id']),
             'created_at' => (string) $row['created_at'],
             'updated_at' => (string) $row['updated_at'],
@@ -147,9 +149,9 @@ final class SyncService
                     $number = $this->seq->next(Sequences::ENTRY_NUMBER);
                     $version = $this->seq->next(Sequences::VERSION);
                     $this->db->run(
-                        'INSERT INTO entries (id, number, type, date, amount_cents, purpose, reason, category, item, receipt_id, created_at, updated_at, deleted_at, version)
-                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                        [$id, $number, $in['type'], $in['date'], $in['amount_cents'], $in['purpose'], $in['reason'], $in['category'], $in['item'],
+                        'INSERT INTO entries (id, number, type, date, amount_cents, purpose, reason, category, item, note, receipt_id, created_at, updated_at, deleted_at, version)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                        [$id, $number, $in['type'], $in['date'], $in['amount_cents'], $in['purpose'], $in['reason'], $in['category'], $in['item'], $in['note'],
                             $in['receipt_id'], $in['created_at'], $in['updated_at'], $in['deleted_at'], $version]
                     );
                     $touchedReceipts[] = $in['receipt_id'];
@@ -166,9 +168,9 @@ final class SyncService
                     }
                     $version = $this->seq->next(Sequences::VERSION);
                     $this->db->run(
-                        'UPDATE entries SET type = ?, date = ?, amount_cents = ?, purpose = ?, reason = ?, category = ?, item = ?, receipt_id = ?,
+                        'UPDATE entries SET type = ?, date = ?, amount_cents = ?, purpose = ?, reason = ?, category = ?, item = ?, note = ?, receipt_id = ?,
                                 updated_at = ?, deleted_at = ?, version = ? WHERE id = ?',
-                        [$in['type'], $in['date'], $in['amount_cents'], $in['purpose'], $in['reason'], $in['category'], $in['item'], $in['receipt_id'],
+                        [$in['type'], $in['date'], $in['amount_cents'], $in['purpose'], $in['reason'], $in['category'], $in['item'], $in['note'], $in['receipt_id'],
                             $in['updated_at'], $in['deleted_at'], $version, $id]
                     );
                     $touchedReceipts[] = $server['receipt_id'];
@@ -233,6 +235,17 @@ final class SyncService
             }
             $e[$f] = $v === '' ? null : $v;
         }
+        $note = $raw['note'] ?? null;
+        if ($note !== null && !is_string($note)) {
+            $err['note'] = 'validation.string';
+            $note = null;
+        }
+        $note = $note === null ? null : trim($note);
+        if ($note !== null && mb_strlen($note) > self::NOTE_MAX) {
+            $err['note'] = 'validation.note_too_long';
+        }
+        $e['note'] = $note === '' ? null : $note;
+
         $rid = $raw['receipt_id'] ?? null;
         if ($rid !== null && !Uuid::isV4($rid)) {
             $err['receipt_id'] = 'validation.uuid';

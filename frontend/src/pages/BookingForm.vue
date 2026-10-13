@@ -11,7 +11,8 @@
         <Typeahead v-model="f.category" :options="data.categoryOptions" :label="$t('form.category')" :placeholder="$t('form.categoryPh')" :error-message="err.category" @update:model-value="err.category = ''" />
         <f7-list-input type="text" :label="$t('form.item')" :placeholder="$t('form.itemPh')" :value="f.item" :error-message="err.item" :error-message-force="!!err.item" @input="f.item = $event.target.value; err.item = ''" />
       </template>
-      <f7-list-input v-else type="text" :label="$t('form.purpose')" :placeholder="$t('form.purposePh')" :value="f.purpose" :error-message="err.purpose" :error-message-force="!!err.purpose" @input="f.purpose = $event.target.value; err.purpose = ''" />
+      <Typeahead v-else v-model="f.purpose" :options="data.purposeOptions" :label="$t('form.purpose')" :placeholder="$t('form.purposePh')" :error-message="err.purpose" @update:model-value="err.purpose = ''" />
+      <f7-list-input type="text" :label="$t('form.note')" :placeholder="$t('form.notePh')" maxlength="100" :value="f.note" :error-message="err.note" :error-message-force="!!err.note" :info="f.note.length >= 80 ? $t('form.noteCount', { n: f.note.length }) : ''" @input="f.note = $event.target.value; err.note = ''" />
     </f7-list>
 
     <template v-if="kind === 'out'">
@@ -61,7 +62,7 @@ const initial = {
   date: existing ? existing.date : seed ? seed.date : today(),
   amount: existing ? fmtCentsPlain(existing.amount_cents) : '',
   reason: existing?.reason || seed?.reason || '', category: existing?.category || seed?.category || '',
-  item: existing?.item || '', purpose: existing?.purpose || '',
+  item: existing?.item || '', purpose: existing?.purpose || '', note: existing?.note || '',
 };
 const f = reactive({ ...initial });
 const err = reactive({});
@@ -107,7 +108,7 @@ async function save() {
     type: kind,
     date: f.date,
     amount_cents: parseCents(f.amount) ?? 0,
-    purpose: f.purpose, reason: f.reason, category: f.category, item: f.item,
+    purpose: f.purpose, reason: f.reason, category: f.category, item: f.item, note: f.note,
     receipt_id: receiptId.value,
   };
   const v = validateEntry(entry);

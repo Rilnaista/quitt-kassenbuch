@@ -80,3 +80,40 @@ export function filterLedger(rows, { q = '', type = '', category = '', reason = 
     return [e.item, e.purpose, e.reason, e.category, e.number, `${d}.${m}.${y}`, amount].filter((x) => x != null).join(' ').toLowerCase().includes(s);
   });
 }
+
+const MONTHS_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+/** "2026-10" -> "Oktober 2026" */
+export function monthLabel(key) {
+  const [y, m] = key.split('-');
+  return `${MONTHS_DE[Number(m) - 1] || m} ${y}`;
+}
+
+/**
+ * Gruppiert Zeilen (Reihenfolge bleibt erhalten, z. B. neueste oben) nach Monat des Buchungsdatums.
+ * Je Gruppe: key (JJJJ-MM), label, in/out (Cent-Summen der enthaltenen Zeilen), rows.
+ */
+export function groupByMonth(rows) {
+  const groups = [];
+  let cur = null;
+  for (const e of rows) {
+    const key = (e.date || '').slice(0, 7);
+    if (!cur || cur.key !== key) {
+      cur = { key, label: monthLabel(key), in: 0, out: 0, rows: [] };
+      groups.push(cur);
+    }
+    cur[e.type === 'out' ? 'out' : 'in'] += e.amount_cents;
+    cur.rows.push(e);
+  }
+  return groups;
+}
+
+/** Ganzzahlige Prozentanteile, Summe genau 100 (Largest-Remainder). Summe 0 -> lauter 0. */
+export function percentShares(values) {
+  const total = values.reduce((s, v) => s + v, 0);
+  if (total <= 0) return values.map(() => 0);
+  const raw = values.map((v) => (v * 100) / total);
+  const out = raw.map(Math.floor);
+  let rest = 100 - out.reduce((s, v) => s + v, 0);
+  raw.map((r, i) => [r - out[i], i]).sort((a, b) => b[0] - a[0] || a[1] - b[1]).forEach(([, i]) => { if (rest > 0) { out[i]++; rest--; } });
+  return out;
+}

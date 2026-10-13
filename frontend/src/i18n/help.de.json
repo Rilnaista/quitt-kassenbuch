@@ -9,7 +9,7 @@
       "ledger": { "title": "Buchungen", "text": "Alle Buchungen in zeitlicher Reihenfolge mit dem laufenden Saldo. Oben suchst und filterst du. Wische eine Buchung nach links, um sie zu bearbeiten oder in den Papierkorb zu legen." },
       "categories": { "title": "Kategorien", "text": "Eine Kategorie fasst Ausgaben zusammen, zum Beispiel pro Person, Gruppe oder Ausflug. Tippe auf eine Kategorie, um alle ihre Ausgaben zu sehen." },
       "detail": { "title": "Buchung", "text": "Hier siehst du alle Angaben und den Beleg. Tippe auf den Beleg, um ihn zu vergrößern. Bearbeiten und Löschen findest du oben und unten." },
-      "form": { "title": "Buchen", "text": "Fülle Datum, Betrag und Grund aus. Grund und Kategorie schlägt Quitt anhand früherer Buchungen vor. Einen Beleg kannst du direkt fotografieren, musst du aber nicht." },
+      "form": { "title": "Buchen", "text": "Fülle Datum, Betrag und Grund aus. Grund und Kategorie schlägt Quitt anhand früherer Buchungen vor. Einen Beleg kannst du direkt fotografieren, musst du aber nicht. Eine kurze Notiz (bis 100 Zeichen) ist optional." },
       "scan": { "title": "Beleg scannen", "text": "Fotografiere den Beleg. Quitt liest Datum und Positionen aus und legt je Position eine Buchung an. Prüfe die Werte, passe sie an und tippe auf „Alle buchen“. Offline wird der Beleg vorgemerkt." },
       "recognition": { "title": "Belegerkennung", "text": "Wähle, wie Belege gelesen werden: gar nicht, lokal auf diesem Gerät oder per KI-Dienst. Beim KI-Dienst werden Belegfotos an den Anbieter gesendet, und es können Kosten entstehen." },
       "trash": { "title": "Papierkorb", "text": "Gelöschte Buchungen liegen hier. Du kannst sie wiederherstellen oder endgültig löschen. Endgültig gelöscht ist wirklich weg." },
@@ -47,7 +47,7 @@
       },
       "statement": {
         "q": "Kontoauszug",
-        "a": "Im Tab „Auszug“ wählst du einen Zeitraum (alles, dieses Jahr, letzter Monat oder frei) und tippst auf „PDF erstellen“. Das PDF sieht aus wie ein Kontoauszug mit Zwischensalden je Seite. Du kannst es teilen oder ausdrucken.\n\nDas Erstellen braucht eine Verbindung zum Server."
+        "a": "Im Tab „Auszug“ wählst du einen Zeitraum (alles, dieses Jahr, letzter Monat oder frei) und tippst auf „PDF erstellen“. Das PDF sieht aus wie ein Kontoauszug mit Zwischensalden je Seite. Du kannst es teilen oder ausdrucken.\n\nMit „Als Excel-Datei“ bekommst du dieselben Buchungen für den Zeitraum als Tabelle (.xlsx), samt Notizen.\n\nDas Erstellen braucht eine Verbindung zum Server."
       },
       "offline": {
         "q": "Offline & Synchronisieren",

@@ -19,6 +19,7 @@ export function normalizeEntry(e) {
     reason: null,
     category: null,
     item: null,
+    note: null,
     receipt_id: null,
     created_at: e.created_at,
     updated_at: e.updated_at,
@@ -27,6 +28,7 @@ export function normalizeEntry(e) {
     version: e.version ?? null,
   };
   const s = (v) => (v == null ? null : String(v).trim() || null);
+  base.note = s(e.note);
   if (e.type === 'in') base.purpose = s(e.purpose);
   else {
     base.reason = s(e.reason);
@@ -47,6 +49,7 @@ export function validateEntry(e) {
   } else if (e.type === 'out') {
     for (const f of ['reason', 'category', 'item']) if (!(e[f] || '').trim()) err[f] = 'form.errRequired';
   } else err.type = 'form.errRequired';
+  if ((e.note || '').trim().length > 100) err.note = 'form.errNote';
   return err;
 }
 

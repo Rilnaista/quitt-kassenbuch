@@ -3,7 +3,7 @@
     <f7-navbar :title="$t('trash.title')" :back-link="$t('common.back')">
       <f7-nav-right><HelpButton topic="trash" /></f7-nav-right>
     </f7-navbar>
-    <f7-block v-if="!data.trashed.length" class="text-align-center">{{ $t('trash.empty') }}</f7-block>
+    <EmptyState v-if="!data.trashed.length" icon="trash" :text="$t('empty.trash')" />
     <template v-else>
       <f7-block v-if="!sync.online" class="sync-pill off"><f7-icon f7="wifi_slash" size="18" /> {{ $t('trash.onlineOnly') }}</f7-block>
       <f7-list media-list strong-ios inset>
@@ -25,6 +25,7 @@
 </template>
 <script setup>
 import { f7 } from 'framework7-vue';
+import EmptyState from '../components/EmptyState.vue';
 import Amount from '../components/Amount.vue';
 import HelpButton from '../components/HelpButton.vue';
 import { useData } from '../stores/data.js';

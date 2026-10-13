@@ -11,12 +11,13 @@
         <template #text><div class="pbar"><i :style="{ width: (c.sum_cents / maxSum) * 100 + '%' }"></i></div></template>
       </f7-list-item>
     </f7-list>
-    <f7-block v-else class="text-align-center">{{ $t('categories.empty') }}</f7-block>
+    <EmptyState v-else icon="tag" :text="$t('empty.categories')" />
     <div style="height:90px"></div>
   </f7-page>
 </template>
 <script setup>
 import { computed } from 'vue';
+import EmptyState from '../components/EmptyState.vue';
 import Amount from '../components/Amount.vue';
 import LockButton from '../components/LockButton.vue';
 import HelpButton from '../components/HelpButton.vue';

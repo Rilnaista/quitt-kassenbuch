@@ -32,6 +32,7 @@ return [
     // --- Feldmeldungen (validation.*) ---
     'validation.required' => 'Bitte ausfüllen.',
     'validation.too_long' => 'Der Text ist zu lang.',
+    'validation.note_too_long' => 'Die Notiz darf höchstens 100 Zeichen lang sein.',
     'validation.string' => 'Bitte einen Text angeben.',
     'validation.boolean' => 'Bitte Ja oder Nein wählen.',
     'validation.invalid_choice' => 'Dieser Wert ist nicht zulässig.',
@@ -82,6 +83,23 @@ return [
     'statement.col.out' => 'Ausgang',
     'statement.col.in' => 'Eingang',
     'statement.col.balance' => 'Saldo',
+
+    // --- Excel-Export (REQ-078) ---
+    'export.sheet' => 'Buchungen',
+    'export.col.number' => 'Nr.',
+    'export.col.date' => 'Datum',
+    'export.col.kind' => 'Art',
+    'export.col.amount' => 'Betrag',
+    'export.col.balance' => 'Saldo',
+    'export.col.text' => 'Verwendungszweck/Bezug',
+    'export.col.reason' => 'Grund',
+    'export.col.category' => 'Kategorie',
+    'export.col.note' => 'Notiz',
+    'export.col.receipt' => 'Beleg',
+    'export.in' => 'Einnahme',
+    'export.out' => 'Ausgabe',
+    'export.yes' => 'ja',
+    'export.no' => 'nein',
 
     // --- Sicherung / Diagnose (REQ-062, REQ-071) ---
     'error.backup_too_new' => 'Diese Sicherung stammt von einer jüngeren Quitt-Version. Bitte zuerst Quitt aktualisieren.',

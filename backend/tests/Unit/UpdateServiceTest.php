@@ -265,7 +265,7 @@ final class UpdateServiceTest extends TestCase
         $this->assertOldStateIntact();
         $db = $this->c->get(Database::class);
         self::assertFalse($db->tableExists('schritt_eins'), 'Datenbank auf alten Stand zurueckgesetzt');
-        self::assertSame(['0001'], $this->c->get(Migrator::class)->applied());
+        self::assertSame(['0001', '0002'], $this->c->get(Migrator::class)->applied());
         self::assertSame(1, (int) $db->scalar('SELECT COUNT(*) FROM auth_tokens'), 'Anmeldungen bleiben nach Rollback');
     }
 

@@ -70,9 +70,17 @@
     "httpsHint": "Offline-Nutzung und Installation auf dem Homescreen funktionieren nur mit HTTPS. Mehr dazu in der Hilfe.",
     "httpsOk": "Verstanden"
   },
+  "empty": {
+    "home": "Hier erscheint deine Kasse, sobald die erste Buchung drin ist. Fang einfach mit einem Beleg an.",
+    "ledger": "Noch keine Buchungen. Leg die erste an, dann siehst du hier den Verlauf.",
+    "noMatch": "Dazu gibt es keine Buchungen. Setz den Filter zurück, um wieder alles zu sehen.",
+    "resetFilter": "Filter zurücksetzen",
+    "categories": "Noch keine Kategorien. Sie entstehen, sobald du bei einer Ausgabe eine Kategorie einträgst.",
+    "trash": "Der Papierkorb ist leer. Gelöschte Buchungen landen hier, bevor sie endgültig verschwinden."
+  },
   "ledger": {
     "title": "Buchungen", "search": "Suchen", "filter": "Filter", "all": "Alle", "fType": "Art", "fIn": "Nur Einnahmen", "fOut": "Nur Ausgaben",
-    "reset": "Zurücksetzen", "empty": "Keine Buchungen gefunden.", "balance": "Saldo", "income": "Einnahme"
+    "reset": "Zurücksetzen", "monthIn": "Ein", "monthOut": "Aus", "empty": "Keine Buchungen gefunden.", "balance": "Saldo", "income": "Einnahme"
   },
   "categories": {
     "title": "Kategorien", "sum": "Summe aller Ausgaben", "expenses": "Ausgaben dieser Kategorie",
@@ -81,6 +89,7 @@
   "form": {
     "date": "Datum", "amount": "Betrag", "reason": "Grund", "category": "Kategorie", "item": "Bezug", "purpose": "Verwendungszweck",
     "reasonPh": "z. B. Geburtstag", "categoryPh": "z. B. Person, Gruppe, Ausflug", "itemPh": "z. B. Blumenstrauß", "purposePh": "z. B. Sammlung Weihnachten",
+    "note": "Notiz (optional)", "notePh": "z. B. bar übergeben", "noteCount": "{n} von 100 Zeichen", "errNote": "Die Notiz darf höchstens 100 Zeichen haben.",
     "receiptOpt": "Beleg (optional)", "camera": "Kamera", "file": "Datei wählen", "receiptRemove": "Beleg entfernen",
     "receiptShrinking": "Bild wird verkleinert …", "receiptError": "Das Bild konnte nicht gelesen werden.",
     "saved": "Gespeichert", "edit": "Buchung bearbeiten", "newExpense": "Neue Ausgabe", "newIncome": "Neue Einnahme",

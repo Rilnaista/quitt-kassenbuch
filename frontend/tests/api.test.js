@@ -41,6 +41,9 @@ describe('API-Layer', () => {
     const url = await api.statementUrl('2026-01-01', '2026-12-31');
     expect(calls[0].body).toEqual({ target: 'statement', params: { from: '2026-01-01', to: '2026-12-31' } });
     expect(url).toBe('http://quitt.test/unterordner/api/v1/statement.pdf?from=2026-01-01&to=2026-12-31&ticket=abc');
+    const c2 = mockFetch({ 'POST /downloads': () => json({ url: 'api/v1/export.xlsx?ticket=x' }) });
+    await api.exportUrl('2026-01-01', '2026-12-31');
+    expect(c2[0].body).toEqual({ target: 'export', params: { from: '2026-01-01', to: '2026-12-31' } });
   });
   it('PIN-Reset: ohne Code (reset-pin-Datei) bzw. mit Code', async () => {
     const calls = mockFetch({ 'POST /auth/reset': () => ({ recovery_code: 'NEU', token: 't', expires_at: 'x' }) });

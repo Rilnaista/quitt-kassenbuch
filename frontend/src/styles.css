@@ -184,3 +184,18 @@ html.dark .sync-icon.st-offline, html.dark .sync-icon.st-error { color: #ffc766;
 .sync-sheet h3 { margin: 4px 0 8px; font-size: 17px; }
 .sync-sheet .sync-last { opacity: 0.7; font-size: 13px; }
 .sync-sheet .button { margin-top: 8px; }
+
+/* Leere Zustaende (REQ-075) */
+.empty-card { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 32px 24px; text-align: center; }
+.empty-logo { width: 64px; height: 64px; }
+.empty-icon { opacity: 0.5; }
+.empty-text { margin: 0; opacity: 0.75; max-width: 320px; }
+.empty-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+/* Monatskopf (REQ-074) */
+.month-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 14px 16px 4px; }
+.month-head h2 { margin: 0; font-size: 15px; font-weight: 600; }
+.month-sums { font-size: 13px; opacity: 0.8; font-variant-numeric: tabular-nums; }
+.month-sums span + span { margin-left: 12px; }
+/* Notiz-Zeile (REQ-079) und Prozent (REQ-077) */
+.bk-note { display: block; font-size: 12px; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pct { font-size: 12px; opacity: 0.75; font-variant-numeric: tabular-nums; }

@@ -40,12 +40,23 @@ describe('Sync-Engine', () => {
     expect(post.body.entries[0]).not.toHaveProperty('number');
     expect(post.body.entries[0]).not.toHaveProperty('version');
     expect(post.body.entries[0]).toMatchObject({ id: e.id, type: 'out', amount_cents: 1290, category: 'Team Sonne', purpose: null });
+    expect(post.body.entries[0]).toHaveProperty('note');
     expect(calls.find((c) => c.method === 'GET').query.since).toBe('0');
 
     expect(await db.count('outbox')).toBe(0);
     expect((await db.get('entries', e.id)).number).toBe(1);
     expect(await db.getMeta('cursor')).toBe(7);
     expect(statuses.at(-1)).toMatchObject({ state: 'synced', pending: 0 });
+  });
+
+  it('REQ-079: note geht in der Outbox mit zum Server', async () => {
+    await repo.saveEntry(out({ note: 'bar uebergeben' }));
+    const calls = mockFetch({
+      'POST /sync': (c) => ({ applied: c.body.entries.map((x) => serverize(x, 1, 7)), conflicts: [], cursor: 7 }),
+      'GET /sync': () => pull({ entries: [], cursor: 7 }),
+    });
+    await engine().sync();
+    expect(calls.find((c) => c.method === 'POST').body.entries[0].note).toBe('bar uebergeben');
   });
 
   it('nutzt beim naechsten Lauf den gespeicherten since-Cursor', async () => {

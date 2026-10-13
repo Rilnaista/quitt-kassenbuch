@@ -9,12 +9,14 @@
     "opening": "Anfangssaldo", "closing": "Endsaldo",
     "create": "PDF erstellen",
     "creating": "PDF wird erstellt …",
+    "excel": "Als Excel-Datei", "excelCreating": "Excel-Datei wird erstellt …",
     "invalid": "Bitte einen gültigen Zeitraum wählen (Von nicht nach Bis).",
     "offline": "Zum Erstellen des Kontoauszugs brauchst du eine Verbindung zum Server. Du bist gerade offline.",
     "needPin": "Zum Erstellen des Kontoauszugs musst du entsperrt sein.",
     "unlock": "Entsperren",
     "openHint": "Falls sich nichts öffnet, erlaube Pop-ups für diese Seite und tippe noch einmal.",
-    "file": "kontoauszug-{from}-{to}.pdf"
+    "file": "kontoauszug-{from}-{to}.pdf",
+    "excelFile": "quitt-buchungen-{from}-{to}.xlsx"
   },
   "backup": {
     "title": "Datensicherung",

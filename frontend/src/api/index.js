@@ -57,6 +57,7 @@ export async function createDownload(target, params = {}) {
   return new URL(url.replace(/^\//, ''), appBase()).href;
 }
 export const statementUrl = (from, to) => createDownload('statement', { from, to });
+export const exportUrl = (from, to) => createDownload('export', { from, to });
 export const backupUrl = () => createDownload('backup');
 export const diagnosticsUrl = () => createDownload('diagnostics');
 export const receiptUrl = (id) => createDownload('receipt', { id });
@@ -64,6 +65,10 @@ export const receiptUrl = (id) => createDownload('receipt', { id });
 // --- Kontoauszug / Sicherung / Update / Protokoll (direkt mit Bearer) ---
 export async function statementPdf(from, to) {
   const res = await request('GET', '/statement.pdf', { query: { from, to }, raw: true });
+  return res.blob();
+}
+export async function exportXlsx(from, to) {
+  const res = await request('GET', '/export.xlsx', { query: { from, to }, raw: true });
   return res.blob();
 }
 export async function backup() {

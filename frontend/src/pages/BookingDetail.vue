@@ -18,6 +18,7 @@
           <f7-list-item :header="$t('form.item')" :title="e.item || '–'" />
         </template>
         <f7-list-item v-else :header="$t('form.purpose')" :title="e.purpose || '–'" />
+        <f7-list-item v-if="e.note" :header="$t('form.note')" :title="e.note" />
       </f7-list>
 
       <template v-if="e.receipt_id">

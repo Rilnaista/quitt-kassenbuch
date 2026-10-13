@@ -37,9 +37,9 @@
     <template v-if="data.categories.length">
       <f7-block-title>{{ $t('home.byCategory') }}</f7-block-title>
       <f7-list media-list inset>
-        <f7-list-item v-for="c in data.categories.slice(0, 6)" :key="c.name" link="#" :title="c.name" :footer="countText(c.count)" @click="openCategory(c.name)">
-          <template #after><Amount type="out" :cents="c.sum_cents" /></template>
-          <template #text><div class="pbar"><i :style="{ width: (c.sum_cents / maxSum) * 100 + '%' }"></i></div></template>
+        <f7-list-item v-for="(c, i) in data.categories.slice(0, 6)" :key="c.name" link="#" :title="c.name" :footer="countText(c.count)" @click="openCategory(c.name)">
+          <template #after><span class="pct">{{ shares[i] }} %</span>&nbsp;<Amount type="out" :cents="c.sum_cents" /></template>
+          <template #text><div class="pbar" role="presentation"><i :style="{ width: shares[i] + '%' }"></i></div></template>
         </f7-list-item>
         <f7-list-item v-if="data.categories.length > 6" link="#" :title="$t('home.allCategories')" @click="goTab('categories')" />
       </f7-list>
@@ -50,16 +50,21 @@
       <BookingRow v-for="e in latest" :key="e.id" :e="e" @open="openBooking" />
       <f7-list-item link="#" :title="$t('home.all')" @click="goTab('ledger')" />
     </f7-list>
-    <f7-block v-else class="text-align-center empty-state">
-      <p>{{ data.ready ? $t('home.empty') : '' }}</p>
-      <f7-button v-if="session.canEdit && data.ready" tonal @click="ui.addOpen = true">{{ $t('home.firstBooking') }}</f7-button>
-    </f7-block>
+    <EmptyState v-else-if="data.ready" logo :text="$t('empty.home')">
+      <template v-if="session.canEdit">
+        <f7-button fill @click="props.f7router.navigate('/beleg/')">{{ $t('add.scan') }}</f7-button>
+        <f7-button tonal @click="props.f7router.navigate('/neu/ausgabe/')">{{ $t('add.expense') }}</f7-button>
+        <f7-button tonal @click="props.f7router.navigate('/neu/einnahme/')">{{ $t('add.income') }}</f7-button>
+      </template>
+    </EmptyState>
     <div style="height:90px"></div>
   </f7-page>
 </template>
 <script setup>
 import { computed, onMounted } from 'vue';
 import { f7 } from 'framework7-vue';
+import EmptyState from '../components/EmptyState.vue';
+import { percentShares } from '../lib/ledger.js';
 import Amount from '../components/Amount.vue';
 import BookingRow from '../components/BookingRow.vue';
 import SyncIcon from '../components/SyncIcon.vue';
@@ -85,7 +90,8 @@ const openReceipts = computed(() => queue.ids
   .map((id) => ({ id, date: fmtDate((data.receiptById(id) || {}).created_at || '') })));
 const openReceipt = (id) => props.f7router.navigate('/beleg/?pending=' + id);
 const discardReceipt = (id) => f7.dialog.confirm(t('flow.confirmDiscard'), t('flow.discard'), () => queue.remove(id));
-const maxSum = computed(() => Math.max(1, ...data.categories.map((c) => c.sum_cents)));
+// Anteil an den Gesamtausgaben (alle Kategorien), ganzzahlig, Summe 100
+const shares = computed(() => percentShares(data.categories.map((c) => c.sum_cents)));
 const latest = computed(() => data.ledger.slice(-5).reverse());
 const countText = (n) => (n === 1 ? t('home.countOne') : t('home.count', { n }));
 const openBooking = (e) => props.f7router.navigate(`/buchung/${e.id}/`);

@@ -1257,7 +1257,7 @@
                     "Downloads"
                 ],
                 "summary": "Einmal-Ticket für einen Download",
-                "description": "Ziele: receipt (params.id; auch bei Lesen ohne PIN), statement (params.from/to; auch bei Lesen ohne PIN), backup und diagnostics (nur mit Token).",
+                "description": "Ziele: receipt (params.id; auch bei Lesen ohne PIN), statement und export (params.from/to; auch bei Lesen ohne PIN), backup und diagnostics (nur mit Token).",
                 "security": [
                     {
                         "bearerAuth": []
@@ -1278,6 +1278,7 @@
                                         "type": "string",
                                         "enum": [
                                             "statement",
+                                            "export",
                                             "backup",
                                             "diagnostics",
                                             "receipt"
@@ -1397,6 +1398,72 @@
                     }
                 },
                 "operationId": "getStatementPdf"
+            }
+        },
+        "/export.xlsx": {
+            "get": {
+                "tags": [
+                    "Kontoauszug"
+                ],
+                "summary": "Buchungen als Excel-Datei (.xlsx)",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "downloadTicket": []
+                    },
+                    {}
+                ],
+                "x-quitt-ticket": true,
+                "parameters": [
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/Ticket"
+                    }
+                ],
+                "x-quitt-access": "read",
+                "responses": {
+                    "200": {
+                        "description": "XLSX",
+                        "content": {
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getExportXlsx",
+                "description": "Blatt \"Buchungen\" mit Anfangssaldo, laufendem Saldo, Notiz; Papierkorb zählt nicht. Dateiname quitt-buchungen-<from>-<to>.xlsx."
             }
         },
         "/backup": {
@@ -2076,6 +2143,12 @@
                         "maxLength": 200,
                         "description": "Bezug (nur out, dort Pflicht)"
                     },
+                    "note": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100,
+                        "description": "Notiz, optional (trim; \"\" wird null)"
+                    },
                     "receipt_id": {
                         "type": "string",
                         "format": "uuid",
@@ -2155,6 +2228,12 @@
                         "type": "string",
                         "nullable": true,
                         "maxLength": 200
+                    },
+                    "note": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100,
+                        "description": "Notiz, optional (trim; \"\" wird null)"
                     },
                     "receipt_id": {
                         "type": "string",

@@ -28,8 +28,11 @@
       <f7-button v-if="session.readonly" tonal @click="session.openLock()">{{ $t('stmt.unlock') }}</f7-button>
     </f7-block>
     <f7-block>
-      <f7-button fill large :disabled="!ok || !canCreate || busy" @click="create">
-        <f7-icon f7="doc_text" size="18" /> {{ busy ? $t('stmt.creating') : $t('stmt.create') }}
+      <f7-button fill large :disabled="!ok || !canCreate || busy" @click="create('pdf')">
+        <f7-icon f7="doc_text" size="18" /> {{ busy && kindBusy === 'pdf' ? $t('stmt.creating') : $t('stmt.create') }}
+      </f7-button>
+      <f7-button outline large style="margin-top:12px" :disabled="!ok || !canCreate || busy" @click="create('xlsx')">
+        <f7-icon f7="table" size="18" /> {{ busy && kindBusy === 'xlsx' ? $t('stmt.excelCreating') : $t('stmt.excel') }}
       </f7-button>
       <p class="hint-small">{{ $t('stmt.openHint') }}</p>
     </f7-block>
@@ -53,6 +56,8 @@ const session = useSession();
 const sync = useSync();
 const data = useData();
 const busy = ref(false);
+const kindBusy = ref('pdf');
+const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const preset = ref('all');
 const earliest = () => (data.ledger.length ? data.ledger[0].date : null);
 const init = presetRange('all', new Date(), earliest());
@@ -67,18 +72,20 @@ const ok = computed(() => validRange(from.value, to.value));
 const sum = computed(() => summarize(data.ledger, from.value, to.value));
 const canCreate = computed(() => sync.online && session.canEdit);
 
-async function create() {
+async function create(kind = 'pdf') {
+  const xlsx = kind === 'xlsx';
+  kindBusy.value = kind;
   const win = preopenWindow(); // iOS: Fenster im Klick oeffnen, sonst blockt der Browser
   busy.value = true;
   try {
     // Teilen-Blatt mit Datei, wenn moeglich (Handy); sonst Einmal-Ticket oeffnen.
     if (!win && navigator.canShare && navigator.share) {
-      const blob = await api.statementPdf(from.value, to.value);
-      const name = t('stmt.file', { from: from.value, to: to.value });
-      if (await shareFile(blob, name, 'application/pdf')) return;
+      const blob = xlsx ? await api.exportXlsx(from.value, to.value) : await api.statementPdf(from.value, to.value);
+      const name = t(xlsx ? 'stmt.excelFile' : 'stmt.file', { from: from.value, to: to.value });
+      if (await shareFile(blob, name, xlsx ? XLSX : 'application/pdf')) return;
     }
-    const url = await api.statementUrl(from.value, to.value);
-    openUrl(url, { win, download: false, newTab: true });
+    const url = xlsx ? await api.exportUrl(from.value, to.value) : await api.statementUrl(from.value, to.value);
+    openUrl(url, { win, download: xlsx, newTab: !xlsx });
   } catch (e) {
     if (win) win.close();
     f7.dialog.alert(errorText(e), t('stmt.title'));

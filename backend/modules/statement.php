@@ -9,6 +9,8 @@ use Quitt\Http\Access;
 use Quitt\Http\Registrar;
 use Quitt\I18n\Lang;
 use Quitt\Service\SettingsService;
+use Quitt\Controller\ExportController;
+use Quitt\Service\ExportService;
 use Quitt\Service\StatementPaginator;
 use Quitt\Service\StatementPdf;
 use Quitt\Service\StatementService;
@@ -19,6 +21,17 @@ return static function (Registrar $r): void {
         $c->get(Database::class), $c->get(SettingsService::class), $c->get(Lang::class), $c->get(Clock::class),
         new StatementPaginator(), new StatementPdf($c->get(Config::class))
     ));
+
+    $r->container->set(ExportService::class, fn ($c) => new ExportService($c->get(StatementService::class), $c->get(Lang::class)));
+
+    $r->download('/export.xlsx', [ExportController::class, 'xlsx'], Access::READ);
+    // POST /downloads { target: "export", params: { from, to } }
+    $r->downloadTarget('export', Access::READ, static function (array $params) use ($r): string {
+        $from = $params['from'] ?? null;
+        $to = $params['to'] ?? null;
+        $r->container->get(StatementService::class)->validateRange($from, $to);
+        return 'export.xlsx?from=' . $from . '&to=' . $to;
+    });
 
     $r->download('/statement.pdf', [StatementController::class, 'pdf'], Access::READ);
 

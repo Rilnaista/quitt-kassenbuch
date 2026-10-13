@@ -16,6 +16,7 @@ export const useData = defineStore('data', {
     trashed: (s) => s.entries.filter((e) => e.deleted_at).sort((a, b) => (b.deleted_at || '').localeCompare(a.deleted_at || '')),
     reasonOptions: (s) => suggestions(s.entries, 'reason'),
     categoryOptions: (s) => suggestions(s.entries, 'category'),
+    purposeOptions: (s) => suggestions(s.entries, 'purpose'),
     itemOptions: (s) => suggestions(s.entries, 'item'),
   },
   actions: {

@@ -63,7 +63,7 @@ final class BackupApiTest extends ApiTestCase
         self::assertTrue($zip->open($path));
         $manifest = json_decode($zip->getFromName('manifest.json'), true);
         self::assertSame('quitt-backup/1', $manifest['format']);
-        self::assertSame(1, $manifest['schema_version']);
+        self::assertSame(2, $manifest['schema_version']);
         self::assertSame(1, $manifest['entries']);
         self::assertSame(1, $manifest['receipts']);
         self::assertNotSame('', $manifest['app_version']);
@@ -192,11 +192,12 @@ final class BackupApiTest extends ApiTestCase
 
     public function testOlderBackupIsMigrated(): void
     {
-        // Eigene Migrationsquelle mit 0002; Sicherung enthaelt nur 0001.
+        // Eigene Migrationsquelle mit 0003; Sicherung enthaelt nur bis 0002.
         $migDir = $this->dataDir . '/mig';
         mkdir($migDir);
         copy(self::appDir() . '/migrations/0001_initial.php', $migDir . '/0001_initial.php');
-        file_put_contents($migDir . '/0002_probe.php', "<?php return static function (PDO \$pdo): void { \$pdo->exec('CREATE TABLE probe (x INTEGER)'); };");
+        copy(self::appDir() . '/migrations/0002_entry_note.php', $migDir . '/0002_entry_note.php');
+        file_put_contents($migDir . '/0003_probe.php', "<?php return static function (PDO \$pdo): void { \$pdo->exec('CREATE TABLE probe (x INTEGER)'); };");
         $db = $this->c->get(\Quitt\Db\Database::class);
         $backup = $this->c->get(\Quitt\Service\BackupService::class);
         $migrator = new \Quitt\Db\Migrator($db, $migDir, $backup, $this->c->get(\Psr\Log\LoggerInterface::class), $this->dataDir . '/.l2');
@@ -208,7 +209,7 @@ final class BackupApiTest extends ApiTestCase
         $res = $svc->restoreFile($zipPath);
         self::assertTrue($res['ok']);
         self::assertTrue($db->tableExists('probe'));
-        self::assertSame(['0001', '0002'], $migrator->applied());
+        self::assertSame(['0001', '0002', '0003'], $migrator->applied());
     }
 
     public function testFailedMigrationKeepsOldState(): void
@@ -217,7 +218,8 @@ final class BackupApiTest extends ApiTestCase
         $migDir = $this->dataDir . '/mig';
         mkdir($migDir);
         copy(self::appDir() . '/migrations/0001_initial.php', $migDir . '/0001_initial.php');
-        file_put_contents($migDir . '/0002_broken.php', "<?php return static function (PDO \$pdo): void { \$pdo->exec('KAPUTT'); };");
+        copy(self::appDir() . '/migrations/0002_entry_note.php', $migDir . '/0002_entry_note.php');
+        file_put_contents($migDir . '/0003_broken.php', "<?php return static function (PDO \$pdo): void { \$pdo->exec('KAPUTT'); };");
         $db = $this->c->get(\Quitt\Db\Database::class);
         $backup = $this->c->get(\Quitt\Service\BackupService::class);
         $log = $this->c->get(\Psr\Log\LoggerInterface::class);
@@ -233,5 +235,36 @@ final class BackupApiTest extends ApiTestCase
         } catch (\PDOException) {
         }
         self::assertEqualsCanonicalizing([self::uuid(1), self::uuid(2)], $this->entryIds(), 'alter Stand wiederhergestellt');
+    }
+
+    public function testSchema1BackupRestoresAndMigratesToNote(): void
+    {
+        $migDir = $this->dataDir . '/mig';
+        mkdir($migDir);
+        copy(self::appDir() . '/migrations/0001_initial.php', $migDir . '/0001_initial.php');
+        $db = $this->c->get(\Quitt\Db\Database::class);
+        $backup = $this->c->get(\Quitt\Service\BackupService::class);
+        $log = $this->c->get(\Psr\Log\LoggerInterface::class);
+        // Stand "Schema 1": Spalte note entfernen und 0002 austragen
+        $this->sync([self::entry(1)]);
+        $db->pdo()->exec('ALTER TABLE entries DROP COLUMN note');
+        $db->pdo()->exec("DELETE FROM schema_migrations WHERE version = '0002'");
+        $zipPath = $this->dataDir . '/schema1.zip';
+        $backup->createArchive($zipPath);
+        $z = new \ZipArchive();
+        $z->open($zipPath);
+        self::assertSame(1, json_decode((string) $z->getFromName('manifest.json'), true)['schema_version']);
+        $z->close();
+
+        $svc = new \Quitt\Service\RestoreService(
+            $this->c->get(\Quitt\App\Config::class), $db, $this->c->get(\Quitt\Db\Migrator::class), $backup, $log
+        );
+        $res = $svc->restoreFile($zipPath);
+        self::assertTrue($res['ok']);
+        self::assertSame(1, $res['entries']);
+        self::assertContains('0002', $this->c->get(\Quitt\Db\Migrator::class)->applied());
+        $this->sync([self::entry(2, ['note' => 'Hallo'])]);
+        $e = $this->decode($this->request('GET', '/sync?since=0', null, $this->token))['entries'];
+        self::assertEqualsCanonicalizing([null, 'Hallo'], array_column($e, 'note'));
     }
 }

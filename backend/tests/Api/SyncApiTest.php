@@ -99,4 +99,27 @@ final class SyncApiTest extends ApiTestCase
         $this->assertError($this->request('POST', '/sync', ['entries' => [self::entry(1)]]), 403, 'pin_required');
         $this->assertError($this->request('GET', '/sync', null, 'abgelaufen'), 401, 'unauthorized');
     }
+
+    public function testNoteRoundTripAndValidation(): void
+    {
+        $note = str_repeat('ä', 100);
+        $r = $this->request('POST', '/sync', ['entries' => [
+            self::entry(1, ['note' => '  ' . $note . '  ']),
+            self::entry(2, ['note' => '   ']),
+            self::entry(3),
+        ]], $this->token);
+        self::assertSame(200, $r->getStatusCode(), (string) $r->getBody());
+        $byId = [];
+        foreach ($this->decode($this->request('GET', '/sync?since=0', null, $this->token))['entries'] as $e) {
+            $byId[$e['id']] = $e;
+        }
+        self::assertSame($note, $byId[self::uuid(1)]['note']);
+        self::assertNull($byId[self::uuid(2)]['note']);
+        self::assertNull($byId[self::uuid(3)]['note']);
+
+        $bad = $this->request('POST', '/sync', ['entries' => [self::entry(4, ['note' => str_repeat('ä', 101)])]], $this->token);
+        $this->assertError($bad, 422, 'validation_failed');
+        $fields = $this->decode($bad)['error']['fields'][self::uuid(4)];
+        self::assertSame('Die Notiz darf höchstens 100 Zeichen lang sein.', $fields['note']);
+    }
 }
