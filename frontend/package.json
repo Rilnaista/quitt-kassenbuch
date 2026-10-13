@@ -1,0 +1,35 @@
+{
+  "name": "quitt-frontend",
+  "version": "0.1.0",
+  "description": "Quitt – das Kassenbuch für kleine Gemeinschaftskassen (Frontend)",
+  "private": true,
+  "license": "AGPL-3.0",
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/copy-ocr.mjs",
+    "dev": "vite --host",
+    "prebuild": "node scripts/copy-ocr.mjs",
+    "build": "vite build",
+    "preview": "vite preview --host --port 4173",
+    "test": "vitest run",
+    "e2e:ui": "node ../scripts/e2e-ui.mjs",
+    "icons": "node scripts/gen-icons.mjs"
+  },
+  "dependencies": {
+    "@tesseract.js-data/deu": "^1.0.0",
+    "framework7": "^9.2.0",
+    "framework7-icons": "^5.0.5",
+    "framework7-vue": "^9.2.0",
+    "idb": "^8.0.4",
+    "pinia": "^3.0.4",
+    "tesseract.js": "^7.0.0",
+    "vue": "^3.5.44"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "fake-indexeddb": "^6.2.5",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.4"
+  }
+}

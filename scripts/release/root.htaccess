@@ -1,0 +1,26 @@
+# Quitt - Installationsordner (Apache 2.2/2.4). Wird bei jedem Update ersetzt.
+Options -Indexes
+DirectoryIndex index.html index.php
+
+AddType application/manifest+json .webmanifest
+AddType text/javascript .js .mjs
+AddDefaultCharset utf-8
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Programm- und Datenordner nie ausliefern (zusaetzlich zu app/.htaccess und data/.htaccess)
+    RewriteRule ^(app|data)(/.*)?$ - [F,L]
+    # Versteckte Dateien/Ordner (.git, .quitt-update-*, .htaccess) sperren, .well-known (Zertifikate) erlauben
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "same-origin"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(self)"
+    # App-Huelle und Service Worker immer neu pruefen (Auslieferung neuer Fassungen an installierte Apps)
+    <FilesMatch "^(index\.html|sw\.js|offline\.html|manifest\.webmanifest|version\.json|setup\.php)$">
+        Header set Cache-Control "no-cache"
+    </FilesMatch>
+</IfModule>

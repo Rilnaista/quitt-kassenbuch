@@ -1,0 +1,86 @@
+{
+  "help": {
+    "overview": "Alle Hilfethemen",
+    "intro": "Kurz erklärt, damit du schnell loslegen kannst.",
+    "ctxMore": "Alle Hilfethemen ansehen",
+    "ctx": {
+      "generic": { "title": "Hilfe", "text": "Tippe auf „Alle Hilfethemen ansehen“, um Antworten auf die häufigsten Fragen zu finden." },
+      "home": { "title": "Übersicht", "text": "Hier siehst du den Kassenstand, die Ausgaben je Kategorie und die letzten Buchungen. Mit dem Plus unten legst du neue Buchungen an. Der Streifen darunter zeigt, ob alles synchron ist." },
+      "ledger": { "title": "Buchungen", "text": "Alle Buchungen in zeitlicher Reihenfolge mit dem laufenden Saldo. Oben suchst und filterst du. Wische eine Buchung nach links, um sie zu bearbeiten oder in den Papierkorb zu legen." },
+      "categories": { "title": "Kategorien", "text": "Eine Kategorie fasst Ausgaben zusammen, zum Beispiel pro Person, Gruppe oder Ausflug. Tippe auf eine Kategorie, um alle ihre Ausgaben zu sehen." },
+      "detail": { "title": "Buchung", "text": "Hier siehst du alle Angaben und den Beleg. Tippe auf den Beleg, um ihn zu vergrößern. Bearbeiten und Löschen findest du oben und unten." },
+      "form": { "title": "Buchen", "text": "Fülle Datum, Betrag und Grund aus. Grund und Kategorie schlägt Quitt anhand früherer Buchungen vor. Einen Beleg kannst du direkt fotografieren, musst du aber nicht." },
+      "scan": { "title": "Beleg scannen", "text": "Fotografiere den Beleg. Quitt liest Datum und Positionen aus und legt je Position eine Buchung an. Prüfe die Werte, passe sie an und tippe auf „Alle buchen“. Offline wird der Beleg vorgemerkt." },
+      "recognition": { "title": "Belegerkennung", "text": "Wähle, wie Belege gelesen werden: gar nicht, lokal auf diesem Gerät oder per KI-Dienst. Beim KI-Dienst werden Belegfotos an den Anbieter gesendet, und es können Kosten entstehen." },
+      "trash": { "title": "Papierkorb", "text": "Gelöschte Buchungen liegen hier. Du kannst sie wiederherstellen oder endgültig löschen. Endgültig gelöscht ist wirklich weg." },
+      "statement": { "title": "Kontoauszug", "text": "Wähle einen Zeitraum und erstelle daraus ein PDF im Stil eines Bankkontoauszugs. Das PDF kannst du teilen oder ausdrucken. Dafür brauchst du eine Verbindung zum Server." },
+      "settings": { "title": "Einstellungen", "text": "Hier änderst du Gruppenname, Darstellung und PIN. Außerdem findest du Belegerkennung, Datensicherung, Update, Diagnose und die Hilfe. Darstellung gilt nur für dieses Gerät, alles andere für alle." },
+      "backup": { "title": "Datensicherung", "text": "Lade eine Sicherung herunter oder spiele eine ein. Vor jedem Einspielen und jedem Update legt Quitt selbst eine Sicherung an, zu der du zurückkehren kannst." },
+      "update": { "title": "Update", "text": "Hier siehst du deine Version und ob eine neuere verfügbar ist. Das Update lädt Quitt selbst auf deinen Server, vorher wird gesichert." },
+      "diagnose": { "title": "Diagnose", "text": "Das Protokoll zeigt Fehler und Warnungen. Bei Problemen kannst du ein Diagnosepaket herunterladen und weitergeben. Es enthält keine PIN und keine Schlüssel." },
+      "helpPage": { "title": "Hilfe", "text": "Tippe ein Thema an, um die Antwort zu lesen. Die Hilfe funktioniert auch offline." }
+    },
+    "topics": {
+      "start": {
+        "q": "Erste Schritte",
+        "a": "Quitt ist dein Kassenbuch: Du hältst Einnahmen und Ausgaben fest, Quitt rechnet den Kassenstand aus.\n\n1. Melde dich mit deiner PIN an.\n2. Tippe auf das Plus und buche eine Einnahme oder Ausgabe, oder scanne einen Beleg.\n3. Unter „Buchungen“ siehst du alles mit dem laufenden Saldo.\n\nAlles wird auf deinem Gerät gespeichert und bei Verbindung mit dem Server abgeglichen."
+      },
+      "book": {
+        "q": "Buchen",
+        "a": "Tippe auf das Plus und wähle „Ausgabe“ oder „Einnahme“.\n\nEine Ausgabe braucht Datum, Betrag und Grund, dazu optional Kategorie, Bezug und Beleg. Eine Einnahme braucht Datum, Betrag und Verwendungszweck.\n\nFalsch gebucht? Wische die Buchung nach links und bearbeite oder lösche sie. Gelöschtes landet im Papierkorb."
+      },
+      "scan": {
+        "q": "Beleg scannen",
+        "a": "Tippe auf das Plus und wähle „Beleg scannen“. Mache ein Foto oder wähle eine Datei.\n\nJe nach Einstellung liest Quitt Datum und Positionen automatisch aus. Du bekommst pro Position eine Karte, die du anpassen oder überspringen kannst. Mit „Alle buchen“ werden die Buchungen angelegt.\n\nOhne Verbindung wird der Beleg vorgemerkt und später erkannt."
+      },
+      "recognition": {
+        "q": "Belegerkennung & Kosten",
+        "a": "Unter „Einstellungen > Belegerkennung“ wählst du:\n\n• Aus: Du tippst alles selbst ein.\n• Lokal auf dem Gerät: kostenlos, nichts verlässt dein Gerät, aber weniger genau.\n• KI-Dienst (Mistral, OpenAI, Anthropic, Gemini oder Ollama): genauer, aber das Belegfoto geht an den Anbieter, und je nach Anbieter fallen Kosten an. Die Abrechnung läuft direkt zwischen dir und dem Anbieter. Mit Ollama auf eigenem Rechner bleiben die Daten bei dir."
+      },
+      "categories": {
+        "q": "Kategorien",
+        "a": "Eine Kategorie ist eine übergeordnete Gruppe für Ausgaben, zum Beispiel eine Person, eine Gruppe, ein Team oder ein Ausflug. Der Grund sagt, wofür das Geld ausgegeben wurde, die Kategorie, für wen oder wozu es gehört.\n\nIm Tab „Kategorien“ siehst du die Summe je Kategorie und mit einem Tipp alle zugehörigen Ausgaben."
+      },
+      "trash": {
+        "q": "Papierkorb",
+        "a": "Gelöschte Buchungen wandern in den Papierkorb und sind bei der Summe nicht mehr dabei. Dort kannst du sie wiederherstellen.\n\n„Endgültig löschen“ und „Papierkorb leeren“ entfernen Buchungen für immer. Das geht nur mit PIN und Verbindung zum Server."
+      },
+      "statement": {
+        "q": "Kontoauszug",
+        "a": "Im Tab „Auszug“ wählst du einen Zeitraum (alles, dieses Jahr, letzter Monat oder frei) und tippst auf „PDF erstellen“. Das PDF sieht aus wie ein Kontoauszug mit Zwischensalden je Seite. Du kannst es teilen oder ausdrucken.\n\nDas Erstellen braucht eine Verbindung zum Server."
+      },
+      "offline": {
+        "q": "Offline & Synchronisieren",
+        "a": "Lesen und Buchen gehen auch ohne Netz. Deine Änderungen warten auf dem Gerät und werden übertragen, sobald wieder eine Verbindung besteht. Der Streifen auf der Übersicht zeigt dir den Stand.\n\nWird dieselbe Buchung auf zwei Geräten geändert, gilt die zuletzt geänderte. Beleg-Erkennung per KI, Papierkorb leeren, Sicherung und Update brauchen eine Verbindung."
+      },
+      "homescreen": {
+        "q": "App auf den Home-Bildschirm legen",
+        "a": "iPhone/iPad (Safari): Tippe auf das Teilen-Symbol, dann auf „Zum Home-Bildschirm“.\n\nAndroid (Chrome): Tippe auf das Menü mit den drei Punkten, dann auf „App installieren“ oder „Zum Startbildschirm hinzufügen“.\n\nDanach startet Quitt wie eine normale App, auch offline. Das klappt nur mit HTTPS."
+      },
+      "https": {
+        "q": "HTTPS – warum nötig?",
+        "a": "Offline-Nutzung und das Installieren auf dem Home-Bildschirm erlauben Browser nur über eine verschlüsselte Verbindung (HTTPS). Ohne HTTPS funktioniert Quitt zwar online, aber nicht offline und nicht als App.\n\nBei den meisten Webhostern aktivierst du ein kostenloses Zertifikat mit wenigen Klicks. Rufe Quitt danach über https:// auf."
+      },
+      "pin": {
+        "q": "PIN ändern oder vergessen",
+        "a": "Ändern: „Einstellungen > Zugriff > PIN ändern“. Die PIN hat 4 bis 8 Ziffern.\n\nVergessen: Tippe auf der PIN-Sperre auf „PIN vergessen?“ und gib den Wiederherstellungscode ein, den du bei der Einrichtung notiert hast.\n\nCode verloren? Lege auf dem Server im Datenordner eine leere Datei mit dem Namen „reset-pin“ an und tippe erneut auf „PIN vergessen?“. Danach kannst du eine neue PIN festlegen. Deine Buchungen bleiben erhalten."
+      },
+      "readonly": {
+        "q": "Lesen ohne PIN",
+        "a": "Mit dieser Einstellung (Einstellungen > Zugriff) öffnet sich Quitt ohne PIN, aber nur lesend. Zum Buchen tippst du oben auf das Schloss und gibst die PIN ein. Praktisch, wenn mehrere Personen nur nachschauen sollen."
+      },
+      "backup": {
+        "q": "Sicherung & Wiederherstellen",
+        "a": "Unter „Einstellungen > Datensicherung“ lädst du eine ZIP-Datei mit allen Daten herunter. Mach das regelmäßig und bewahre die Datei sicher auf, denn sie enthält auch deinen KI-Schlüssel.\n\nEine Sicherung kannst du dort wieder einspielen. Dabei werden alle aktuellen Daten ersetzt. Vorher sichert Quitt den bisherigen Stand selbst, du findest ihn unter „Automatische Sicherungen“."
+      },
+      "update": {
+        "q": "Update",
+        "a": "Unter „Einstellungen > Update“ siehst du, ob es eine neue Version gibt, und kannst sie mit einem Tipp installieren. Quitt sichert vorher und kehrt bei einem Fehler zum alten Stand zurück.\n\nLäuft Quitt in Docker, aktualisierst du über das neue Docker-Image."
+      },
+      "diagnose": {
+        "q": "Probleme melden & Diagnose",
+        "a": "Unter „Einstellungen > Diagnose“ siehst du das Protokoll mit Fehlern und Warnungen. Das „Diagnosepaket“ ist eine Datei mit Systemdaten und Protokoll, die du jemandem schicken kannst, der dir hilft. Sie enthält keine PIN und keine Schlüssel.\n\nStartet Quitt gar nicht, öffne die Seite diagnose.html im selben Ordner wie die App."
+      }
+    }
+  }
+}

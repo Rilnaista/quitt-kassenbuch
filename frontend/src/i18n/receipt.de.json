@@ -1,0 +1,63 @@
+{
+  "flow": {
+    "title": "Beleg scannen",
+    "pickText": "Fotografiere den Beleg oder wähle ein Bild aus. Quitt liest Datum und Positionen und schlägt dir die Buchungen vor.",
+    "camera": "Kamera", "file": "Datei wählen",
+    "offlineNote": "Du bist offline. Mit KI-Erkennung wird der Beleg vorgemerkt und später erkannt.",
+    "needUnlock": "Zum Buchen musst du entsperrt sein.",
+    "shrinking": "Bild wird verkleinert …",
+    "recognizing": "Beleg wird gelesen …",
+    "loadingEngine": "Texterkennung wird geladen …",
+    "uploading": "Beleg wird übertragen …",
+    "queuedTitle": "Beleg vorgemerkt",
+    "queuedText": "Der Beleg ist gespeichert. Sobald du wieder online bist, kannst du die Erkennung auf der Übersicht starten.",
+    "imageError": "Das Bild konnte nicht gelesen werden.",
+    "imageTimeout": "Das Verkleinern des Bildes braucht zu viel Zeit. Bitte versuche es noch einmal oder wähle ein kleineres Bild.",
+    "saveError": "Der Beleg konnte nicht auf dem Gerät gespeichert werden. Du kannst die Positionen von Hand eingeben.",
+    "ocrError": "Die Texterkennung auf dem Gerät hat nicht funktioniert. Du kannst die Positionen von Hand eingeben.",
+    "aiError": "Die Erkennung hat nicht geklappt: {msg} Du kannst die Positionen von Hand eingeben.",
+    "uploadError": "Der Beleg konnte noch nicht übertragen werden. Du kannst die Positionen von Hand eingeben; die Erkennung lässt sich später auf der Übersicht starten.",
+    "nothingFound": "Es wurden keine Positionen erkannt. Bitte trage sie von Hand ein.",
+    "date": "Belegdatum",
+    "prefillHint": "Grund und Kategorie der ersten Position gelten auch für die folgenden, bis du sie dort änderst.",
+    "total": "Erkannte Summe auf dem Beleg: {sum}",
+    "position": "Position {n}",
+    "skip": "Überspringen", "unskip": "Wieder aufnehmen", "skipped": "Wird nicht gebucht.",
+    "discount": "{item}: {amount} eingerechnet",
+    "discountDefault": "Rabatt",
+    "split": "Eigene Zeile",
+    "negativeNote": "Negativer Betrag – wird nicht gebucht.",
+    "fold": "In vorherige Position einrechnen",
+    "notBookable": "Betrag muss größer als 0 sein.",
+    "add": "Position hinzufügen",
+    "bookAll": "Alle buchen ({n})",
+    "booked": "{n} Ausgaben gebucht",
+    "bookedOne": "1 Ausgabe gebucht",
+    "fixErrors": "Bitte ergänze die markierten Felder.",
+    "nothingToBook": "Keine buchbare Position vorhanden.",
+    "discard": "Verwerfen",
+    "confirmDiscard": "Diesen Beleg nicht weiter bearbeiten?",
+    "morePosition": "Weitere Position aus diesem Beleg"
+  },
+  "pending": {
+    "title": "Belege ohne Buchung",
+    "footer": "Beleg gespeichert, noch nicht gebucht",
+    "recognize": "Erkennen"
+  },
+  "recog": {
+    "title": "Belegerkennung",
+    "mode": { "off": "Aus", "local": "Lokal auf dem Gerät", "ai": "KI-Dienst" },
+    "modeHint": {
+      "off": "Positionen gibst du von Hand ein.",
+      "local": "Kostenlos und auch offline. Die Erkennung läuft auf diesem Gerät, die Genauigkeit ist begrenzt.",
+      "ai": "Das Belegfoto wird an den gewählten Dienst gesendet. Das kann Kosten verursachen. Braucht eine Internetverbindung."
+    },
+    "provider": "Anbieter", "key": "Schlüssel", "keyPh": "Schlüssel eingeben",
+    "keySet": "Gesetzt", "keyNotSet": "Nicht gesetzt", "keyDelete": "Schlüssel löschen",
+    "keyDeleted": "Schlüssel gelöscht", "confirmKeyDelete": "Den gespeicherten Schlüssel löschen?",
+    "model": "Modell", "server": "Server-Adresse", "serverPh": "http://192.168.1.5:11434",
+    "test": "Verbindung testen", "testing": "Verbindung wird geprüft …",
+    "saved": "Gespeichert", "needUnlock": "Zum Ändern entsperren.", "needOnline": "Ändern geht nur mit Verbindung zum Server.",
+    "offlineFlag": "Funktioniert auch ohne Internet.", "loadError": "Die Anbieterliste konnte nicht geladen werden."
+  }
+}

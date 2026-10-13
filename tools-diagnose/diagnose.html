@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quitt – Diagnose-Betrachter</title>
+<style>
+:root {
+  --accent: #1F8A5B;
+  --bg: #f4f6f5;
+  --surface: #ffffff;
+  --text: #1c2420;
+  --muted: #56635d;
+  --border: #d5ddd9;
+  --bad: #b42318;
+  --warn: #9a5b00;
+  --info: #1d5fb8;
+  --code: #eef3f1;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121614;
+    --surface: #1b211e;
+    --text: #e4ebe7;
+    --muted: #a3b4aa;
+    --border: #2e3934;
+    --bad: #ff8a80;
+    --warn: #fdb74a;
+    --info: #8db8ff;
+    --code: #111613;
+  }
+}
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+}
+.wrap { max-width: 880px; margin: 0 auto; padding: 16px; }
+header { border-bottom: 3px solid var(--accent); margin-bottom: 20px; padding-bottom: 8px; }
+h1 { font-size: 1.5rem; margin: 8px 0 4px; }
+h2 { font-size: 1.15rem; margin: 0 0 12px; }
+.muted { color: var(--muted); font-size: .92rem; }
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.drop {
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius);
+  padding: 40px 16px;
+  text-align: center;
+  background: var(--surface);
+}
+.drop.over { background: rgba(31, 138, 91, .14); }
+.drop p { margin: 0 0 14px; }
+.error { color: var(--bad); border-color: var(--bad); margin-top: 16px; }
+button {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  padding: 8px 14px;
+  min-height: 40px;
+}
+button.ghost { background: transparent; color: var(--accent); }
+.toolbar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+.tab { flex: 1; background: transparent; color: var(--accent); }
+.tab[aria-selected="true"] { background: var(--accent); color: #fff; }
+.table-wrap { overflow-x: auto; }
+table.meta { width: 100%; border-collapse: collapse; }
+table.meta th, table.meta td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+table.meta th { width: 34%; color: var(--muted); font-weight: 600; }
+table.meta td { word-break: break-word; }
+pre {
+  background: var(--code);
+  color: var(--text);
+  padding: 10px;
+  border-radius: 8px;
+  overflow: auto;
+  font-size: .85rem;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+.checks { list-style: none; padding: 0; margin: 0; }
+.check {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.mark { flex: none; width: 1.4em; text-align: center; font-weight: 700; }
+.mark.ok { color: var(--accent); }
+.mark.fail { color: var(--bad); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.stat { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.stat b { display: block; font-size: 1.4rem; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.chip { background: transparent; color: var(--accent); min-height: 40px; }
+.chip[aria-pressed="true"] { background: var(--accent); color: #fff; }
+input[type="search"] {
+  width: 100%;
+  font: inherit;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+.timeline { list-style: none; padding: 0; margin: 12px 0 0; }
+.entry {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.entry-head {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  text-align: left;
+  background: transparent;
+  color: var(--text);
+  border: 0;
+  border-radius: 0;
+  padding: 10px 12px;
+}
+.entry-head:hover { background: var(--code); }
+.meta-line { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .85rem; color: var(--muted); }
+.badge { font-weight: 700; }
+.lvl-error { color: var(--bad); }
+.lvl-warning { color: var(--warn); }
+.lvl-info { color: var(--info); }
+.lvl-debug { color: var(--muted); }
+.msg { font-weight: 600; margin-top: 4px; word-break: break-word; }
+.entry pre { margin: 0 12px 12px; }
+@media (max-width: 560px) {
+  table.meta th, table.meta td { display: block; width: 100%; }
+  table.meta th { border-bottom: 0; padding-bottom: 0; }
+  table.meta td { padding-top: 2px; }
+  .card { padding: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Quitt – Diagnose-Betrachter</h1>
+    <p class="muted">Zeigt ein Diagnosepaket (JSON) an. Alles läuft lokal im Browser; es wird nichts hochgeladen.</p>
+  </header>
+
+  <div id="intro">
+    <div id="drop" class="drop card">
+      <p><strong>Diagnosepaket hierher ziehen</strong></p>
+      <p class="muted">oder über die Schaltfläche auswählen (Datei im Format quitt-diagnostics/1)</p>
+      <button id="pick" type="button">Datei auswählen</button>
+      <input id="file" type="file" accept=".json,application/json" hidden>
+    </div>
+    <p id="error" class="card error" role="alert" hidden></p>
+  </div>
+
+  <div id="result" hidden>
+    <div class="toolbar">
+      <button id="reset" class="ghost" type="button">Andere Datei öffnen</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button id="tab-system" class="tab" type="button" role="tab" aria-selected="true" aria-controls="panel-system">System</button>
+      <button id="tab-log" class="tab" type="button" role="tab" aria-selected="false" aria-controls="panel-log">Protokoll</button>
+    </div>
+
+    <section id="panel-system" class="card" role="tabpanel">
+      <h2>System</h2>
+      <div class="table-wrap">
+        <table class="meta"><tbody id="meta-body"></tbody></table>
+      </div>
+      <h2 style="margin-top: 22px;">Prüfungen</h2>
+      <p id="checks-sum" class="muted"></p>
+      <ul id="checks" class="checks"></ul>
+    </section>
+
+    <section id="panel-log" class="card" role="tabpanel" hidden>
+      <h2>Protokoll</h2>
+      <div class="stats">
+        <div class="stat"><span class="muted">Fehler</span><b id="sum-error">0</b></div>
+        <div class="stat"><span class="muted">Warnungen</span><b id="sum-warning">0</b></div>
+        <div class="stat"><span class="muted">Einträge gesamt</span><b id="sum-total">0</b></div>
+      </div>
+      <p class="muted">Zeitraum: <span id="sum-range">–</span></p>
+      <div id="filters" class="filters" role="group" aria-label="Nach Level filtern"></div>
+      <input id="search" type="search" placeholder="Suchen in Nachricht, Kanal oder Kontext" aria-label="Protokoll durchsuchen">
+      <p id="count-info" class="muted"></p>
+      <p id="empty" class="muted" hidden>Keine Einträge für diese Auswahl gefunden.</p>
+      <ol id="timeline" class="timeline"></ol>
+    </section>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var FORMAT = "quitt-diagnostics/1";
+  var LEVEL_ORDER = ["error", "warning", "info", "debug"];
+  var LEVELS = {
+    error:   { label: "Fehler",  sym: "✖" },
+    warning: { label: "Warnung", sym: "▲" },
+    info:    { label: "Info",    sym: "ℹ" },
+    debug:   { label: "Debug",   sym: "•" }
+  };
+  var FILTER_LABELS = { all: "Alle", error: "Fehler", warning: "Warnungen", info: "Info", debug: "Debug" };
+  var META_LABELS = {
+    version: "Version",
+    php: "PHP-Version",
+    sapi: "PHP-SAPI",
+    os: "Betriebssystem",
+    modules: "PHP-Module",
+    base_path: "Basispfad",
+    https: "HTTPS",
+    docker: "Docker-Betrieb",
+    disk_free: "Freier Speicher",
+    db_size: "Datenbankgröße",
+    counts: "Zählerstände",
+    settings: "Einstellungen"
+  };
+
+  var state = { data: null, level: "all", q: "" };
+
+  function $(id) { return document.getElementById(id); }
+
+  // Baut DOM-Knoten ohne innerHTML, damit Inhalte aus der Datei nie als HTML interpretiert werden.
+  function h(tag, props, kids) {
+    var n = document.createElement(tag);
+    if (props) {
+      Object.keys(props).forEach(function (k) {
+        var v = props[k];
+        if (v === false || v === null || v === undefined) return;
+        if (k === "text") n.textContent = String(v);
+        else if (k === "cls") n.className = v;
+        else if (k === "on") Object.keys(v).forEach(function (ev) { n.addEventListener(ev, v[ev]); });
+        else n.setAttribute(k, v === true ? "" : String(v));
+      });
+    }
+    (kids || []).forEach(function (c) {
+      if (c === null || c === undefined || c === false) return;
+      n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+    });
+    return n;
+  }
+
+  function parseTs(ts) {
+    var d = new Date(ts);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function fmtTs(value) {
+    var d = (value instanceof Date) ? value : parseTs(value);
+    if (!d) return String(value === undefined ? "–" : value);
+    return d.toLocaleString("de-DE", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit", second: "2-digit"
+    });
+  }
+
+  function checkFormat(d) {
+    if (!d || typeof d !== "object" || Array.isArray(d)) {
+      return "Die Datei enthält kein Diagnosepaket (erwartet ein JSON-Objekt).";
+    }
+    if (!("format" in d)) {
+      return "Die Datei ist kein Quitt-Diagnosepaket (das Feld „format“ fehlt).";
+    }
+    if (d.format !== FORMAT) {
+      return "Unbekanntes Format „" + d.format + "“. Dieser Betrachter öffnet nur „" + FORMAT + "“.";
+    }
+    if (!d.meta || typeof d.meta !== "object" || !Array.isArray(d.checks) || !Array.isArray(d.logs)) {
+      return "Das Diagnosepaket ist unvollständig: „meta“, „checks“ oder „logs“ fehlen oder sind fehlerhaft.";
+    }
+    return null;
+  }
+
+  function showError(msg) {
+    $("error").textContent = msg;
+    $("error").hidden = false;
+  }
+
+  function clearError() {
+    $("error").textContent = "";
+    $("error").hidden = true;
+  }
+
+  function openFile(file) {
+    if (!file) return;
+    clearError();
+    var reader = new FileReader();
+    reader.onload = function () {
+      var data;
+      try {
+        data = JSON.parse(String(reader.result).replace(/^﻿/, ""));
+      } catch (e) {
+        showError("Die Datei ist kein gültiges JSON. Bitte das unveränderte Diagnosepaket wählen.");
+        return;
+      }
+      var problem = checkFormat(data);
+      if (problem) {
+        showError(problem);
+        return;
+      }
+      state.data = data;
+      state.level = "all";
+      state.q = "";
+      $("search").value = "";
+      render();
+    };
+    reader.onerror = function () { showError("Die Datei konnte nicht gelesen werden."); };
+    reader.readAsText(file, "utf-8");
+  }
+
+  function formatValue(v) {
+    if (v === null || v === undefined || v === "") return h("span", { cls: "muted", text: "–" });
+    if (typeof v === "boolean") return document.createTextNode(v ? "ja" : "nein");
+    if (Array.isArray(v) && v.every(function (x) { return x === null || typeof x !== "object"; })) {
+      return document.createTextNode(v.length ? v.join(", ") : "–");
+    }
+    if (typeof v === "object") return h("pre", { text: JSON.stringify(v, null, 2) });
+    return document.createTextNode(String(v));
+  }
+
+  // Felder, die als ganze Zahl in Bytes geliefert werden.
+  var BYTE_KEYS = { disk_free: true, db_size: true };
+  var BYTE_UNITS = ["B", "KB", "MB", "GB", "TB"];
+
+  // Bytes -> lesbar (deutsch, 1024er-Schritte), z. B. "1,9 GB", "240 KB".
+  function formatBytes(n) {
+    var i = 0;
+    var v = n;
+    while (v >= 1024 && i < BYTE_UNITS.length - 1) { v = v / 1024; i++; }
+    var digits = (i === 0 || v >= 10) ? 0 : 1;
+    return v.toLocaleString("de-DE", { minimumFractionDigits: 0, maximumFractionDigits: digits }) + " " + BYTE_UNITS[i];
+  }
+
+  // Bereits lesbare Strings (z. B. "1,9 GB") bleiben unveraendert.
+  function formatMetaValue(k, v) {
+    if (BYTE_KEYS[k] && typeof v === "number" && isFinite(v) && v >= 0) {
+      return document.createTextNode(formatBytes(v));
+    }
+    return formatValue(v);
+  }
+
+  function renderSystem(d) {
+    var tbody = $("meta-body");
+    tbody.innerHTML = "";
+    Object.keys(d.meta).forEach(function (k) {
+      tbody.appendChild(h("tr", null, [
+        h("th", { scope: "row", text: META_LABELS[k] || k }),
+        h("td", null, [formatMetaValue(k, d.meta[k])])
+      ]));
+    });
+
+    var checks = d.checks;
+    var okCount = checks.filter(function (c) { return c && c.ok === true; }).length;
+    $("checks-sum").textContent = okCount + " von " + checks.length + " Prüfungen bestanden";
+
+    var ul = $("checks");
+    ul.innerHTML = "";
+    checks.forEach(function (c) {
+      var ok = !!(c && c.ok === true);
+      ul.appendChild(h("li", { cls: "check" }, [
+        h("span", {
+          cls: "mark " + (ok ? "ok" : "fail"),
+          "aria-label": ok ? "bestanden" : "fehlgeschlagen",
+          text: ok ? "✔" : "✘"
+        }),
+        h("div", null, [
+          h("strong", { text: String((c && c.name) || "Unbenannte Prüfung") }),
+          (c && c.detail) ? h("div", { cls: "muted", text: String(c.detail) }) : null
+        ])
+      ]));
+    });
+  }
+
+  function renderSummary(logs) {
+    var counts = { all: logs.length, error: 0, warning: 0, info: 0, debug: 0 };
+    var minD = null, maxD = null;
+    logs.forEach(function (l) {
+      if (!l) return;
+      if (LEVEL_ORDER.indexOf(l.level) !== -1) counts[l.level]++;
+      var d = parseTs(l.ts);
+      if (d) {
+        if (!minD || d < minD) minD = d;
+        if (!maxD || d > maxD) maxD = d;
+      }
+    });
+    $("sum-error").textContent = counts.error;
+    $("sum-warning").textContent = counts.warning;
+    $("sum-total").textContent = logs.length;
+    $("sum-range").textContent = minD ? (fmtTs(minD) + " bis " + fmtTs(maxD)) : "keine gültigen Zeitstempel";
+    state.counts = counts;
+    renderFilters();
+  }
+
+  function renderFilters() {
+    var box = $("filters");
+    box.innerHTML = "";
+    ["all"].concat(LEVEL_ORDER).forEach(function (key) {
+      var lv = LEVELS[key];
+      var label = (lv ? lv.sym + " " : "") + FILTER_LABELS[key] + " (" + state.counts[key] + ")";
+      box.appendChild(h("button", {
+        cls: "chip",
+        type: "button",
+        "aria-pressed": String(state.level === key),
+        text: label,
+        on: { click: function () { state.level = key; renderFilters(); renderTimeline(); } }
+      }));
+    });
+  }
+
+  function haystack(l) {
+    return [String(l.message || ""), String(l.channel || ""), String(l.level || ""),
+      JSON.stringify(l.context === undefined ? {} : l.context)].join(" ").toLowerCase();
+  }
+
+  function entryNode(l) {
+    var lv = LEVELS[l.level] || { label: String(l.level || "unbekannt"), sym: "?" };
+    var ctx = l.context;
+    var hasCtx = !(ctx === undefined || ctx === null ||
+      (typeof ctx === "object" && !Array.isArray(ctx) && Object.keys(ctx).length === 0));
+    var pre = h("pre", { hidden: true, text: hasCtx ? JSON.stringify(ctx, null, 2) : "Kein Kontext vorhanden." });
+    var btn = h("button", {
+      cls: "entry-head",
+      type: "button",
+      "aria-expanded": "false"
+    }, [
+      h("div", { cls: "meta-line" }, [
+        h("span", { text: fmtTs(l.ts) }),
+        h("span", { cls: "badge lvl-" + (l.level || ""), text: lv.sym + " " + lv.label }),
+        h("span", { text: "Kanal: " + (l.channel || "–") })
+      ]),
+      h("div", { cls: "msg", text: String(l.message || "") })
+    ]);
+    btn.addEventListener("click", function () {
+      var open = pre.hidden;
+      pre.hidden = !open;
+      btn.setAttribute("aria-expanded", String(open));
+    });
+    return h("li", { cls: "entry" }, [btn, pre]);
+  }
+
+  function renderTimeline() {
+    var logs = state.data.logs;
+    var q = state.q;
+    var items = logs
+      .map(function (l, i) { return { l: l, i: i }; })
+      .filter(function (x) { return x.l && typeof x.l === "object"; })
+      .filter(function (x) { return state.level === "all" || x.l.level === state.level; })
+      .filter(function (x) { return !q || haystack(x.l).indexOf(q) !== -1; })
+      .sort(function (a, b) {
+        var ta = parseTs(a.l.ts), tb = parseTs(b.l.ts);
+        var va = ta ? ta.getTime() : 0, vb = tb ? tb.getTime() : 0;
+        return (vb - va) || (b.i - a.i);
+      });
+
+    var list = $("timeline");
+    list.innerHTML = "";
+    items.forEach(function (x) { list.appendChild(entryNode(x.l)); });
+    $("empty").hidden = items.length > 0;
+    $("count-info").textContent = items.length + " von " + logs.length + " Einträgen angezeigt (neueste oben)";
+  }
+
+  function selectTab(name) {
+    var sys = name === "system";
+    $("tab-system").setAttribute("aria-selected", String(sys));
+    $("tab-log").setAttribute("aria-selected", String(!sys));
+    $("panel-system").hidden = !sys;
+    $("panel-log").hidden = sys;
+  }
+
+  function render() {
+    $("intro").hidden = true;
+    $("result").hidden = false;
+    renderSystem(state.data);
+    renderSummary(state.data.logs);
+    renderTimeline();
+    selectTab("system");
+    window.scrollTo(0, 0);
+  }
+
+  function init() {
+    var drop = $("drop");
+
+    $("pick").addEventListener("click", function () { $("file").click(); });
+    $("file").addEventListener("change", function (e) {
+      openFile(e.target.files[0]);
+      e.target.value = "";
+    });
+
+    drop.addEventListener("dragover", function (e) { e.preventDefault(); drop.classList.add("over"); });
+    drop.addEventListener("dragleave", function () { drop.classList.remove("over"); });
+
+    // Ablegen irgendwo auf der Seite oeffnet die Datei; der Browser soll sie nicht selbst anzeigen.
+    window.addEventListener("dragover", function (e) { e.preventDefault(); });
+    window.addEventListener("drop", function (e) {
+      e.preventDefault();
+      drop.classList.remove("over");
+      if (e.dataTransfer && e.dataTransfer.files.length) openFile(e.dataTransfer.files[0]);
+    });
+
+    $("reset").addEventListener("click", function () {
+      state.data = null;
+      $("result").hidden = true;
+      $("intro").hidden = false;
+      clearError();
+      window.scrollTo(0, 0);
+    });
+
+    $("tab-system").addEventListener("click", function () { selectTab("system"); });
+    $("tab-log").addEventListener("click", function () { selectTab("log"); });
+
+    $("search").addEventListener("input", function (e) {
+      state.q = e.target.value.trim().toLowerCase();
+      renderTimeline();
+    });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

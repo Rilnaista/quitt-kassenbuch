@@ -1,0 +1,137 @@
+{
+  "brand": {
+    "subtitle": "das Kassenbuch für kleine Gemeinschaftskassen",
+    "slogan": "Scannen. Buchen. Quitt."
+  },
+  "common": {
+    "back": "Zurück", "cancel": "Abbrechen", "done": "Fertig", "edit": "Bearbeiten", "delete": "Löschen",
+    "undo": "Rückgängig", "noItem": "Ausgabe", "save": "Speichern"
+  },
+  "nav": {
+    "home": "Übersicht", "ledger": "Buchungen", "categories": "Kategorien", "statement": "Kontoauszug",
+    "settings": "Einstellungen", "tabStatement": "Auszug", "tabSettings": "Mehr", "trash": "Papierkorb", "help": "Hilfe"
+  },
+  "add": {
+    "fab": "Neu", "title": "Was möchtest du buchen?", "scan": "Beleg scannen", "expense": "Ausgabe", "income": "Einnahme"
+  },
+  "lock": {
+    "title": "Quitt", "enter": "PIN eingeben", "wrong": "Falsche PIN, versuch es nochmal", "delete": "Löschen",
+    "ok": "OK", "forgot": "PIN vergessen?",
+    "wait": "Zu viele Versuche. Bitte warte {s} Sekunden.",
+    "unlockToEdit": "Entsperren, um zu bearbeiten",
+    "readonlyHint": "Du liest ohne PIN. Tippe oben auf das Schloss, um zu bearbeiten."
+  },
+  "reset": {
+    "title": "PIN vergessen?",
+    "intro": "Gib deinen Wiederherstellungscode ein, den du beim Einrichten notiert hast, und wähle eine neue PIN.",
+    "fileFound": "Die Datei „reset-pin“ liegt auf dem Server. Du kannst direkt eine neue PIN festlegen.",
+    "fileHint": "Code verloren? Lege eine leere Datei „reset-pin“ in den Datenordner des Servers und tippe erneut auf „PIN vergessen?“. Deine Buchungen bleiben erhalten.",
+    "code": "Wiederherstellungscode", "newPin": "Neue PIN (4–8 Ziffern)", "repeatPin": "Neue PIN wiederholen",
+    "submit": "PIN festlegen", "wrongCode": "Der Wiederherstellungscode stimmt nicht.",
+    "doneTitle": "Neue PIN gespeichert",
+    "newCodeText": "Das ist dein neuer Wiederherstellungscode. Der alte gilt nicht mehr. Notiere ihn jetzt – er wird nur dieses eine Mal angezeigt.",
+    "noted": "Ich habe ihn notiert"
+  },
+  "pin": {
+    "changeTitle": "PIN ändern", "old": "Bisherige PIN", "new": "Neue PIN", "repeat": "Neue PIN wiederholen",
+    "rule": "4 bis 8 Ziffern", "invalid": "Die PIN muss aus 4 bis 8 Ziffern bestehen.",
+    "mismatch": "Die beiden neuen PINs stimmen nicht überein.", "oldWrong": "Die bisherige PIN stimmt nicht.",
+    "changed": "PIN geändert"
+  },
+  "notInstalled": {
+    "title": "Quitt ist noch nicht eingerichtet",
+    "text": "Auf dem Server fehlt die Ersteinrichtung. Schließe sie zuerst ab und tippe dann auf „Erneut prüfen“.",
+    "retry": "Erneut prüfen"
+  },
+  "sync": {
+    "offline": "Offline – Änderungen werden später übertragen",
+    "offlinePending": "Offline – {n} Änderungen ausstehend",
+    "syncing": "Synchronisiere …",
+    "pending": "{n} Änderungen ausstehend",
+    "pendingOneCount": "1 Änderung ausstehend",
+    "pendingOne": "Änderung noch nicht übertragen",
+    "rejected": "{n} vom Server abgelehnt",
+    "rejectedOne": "Vom Server abgelehnt",
+    "error": "Server gerade nicht erreichbar – neuer Versuch folgt",
+    "errorPending": "Server gerade nicht erreichbar – {n} Änderungen ausstehend",
+    "ok": "Alles synchron",
+    "title": "Synchronisation",
+    "now": "Jetzt synchronisieren",
+    "never": "Letzter Abgleich: noch nicht in dieser Sitzung",
+    "last": "Letzter Abgleich: {when} Uhr",
+    "conflictToast": "Eine Buchung wurde auf einem anderen Gerät neuer geändert. Der neuere Stand gilt."
+  },
+  "home": {
+    "saldo": "Kassenstand", "byCategory": "Ausgaben je Kategorie", "allCategories": "Alle Kategorien anzeigen",
+    "latest": "Letzte Buchungen", "all": "Alle Buchungen anzeigen",
+    "count": "{n} Buchungen", "countOne": "1 Buchung",
+    "empty": "Noch keine Buchungen.", "firstBooking": "Erste Buchung anlegen",
+    "httpsHint": "Offline-Nutzung und Installation auf dem Homescreen funktionieren nur mit HTTPS. Mehr dazu in der Hilfe.",
+    "httpsOk": "Verstanden"
+  },
+  "ledger": {
+    "title": "Buchungen", "search": "Suchen", "filter": "Filter", "all": "Alle", "fType": "Art", "fIn": "Nur Einnahmen", "fOut": "Nur Ausgaben",
+    "reset": "Zurücksetzen", "empty": "Keine Buchungen gefunden.", "balance": "Saldo", "income": "Einnahme"
+  },
+  "categories": {
+    "title": "Kategorien", "sum": "Summe aller Ausgaben", "expenses": "Ausgaben dieser Kategorie",
+    "empty": "Noch keine Ausgaben mit Kategorie."
+  },
+  "form": {
+    "date": "Datum", "amount": "Betrag", "reason": "Grund", "category": "Kategorie", "item": "Bezug", "purpose": "Verwendungszweck",
+    "reasonPh": "z. B. Geburtstag", "categoryPh": "z. B. Person, Gruppe, Ausflug", "itemPh": "z. B. Blumenstrauß", "purposePh": "z. B. Sammlung Weihnachten",
+    "receiptOpt": "Beleg (optional)", "camera": "Kamera", "file": "Datei wählen", "receiptRemove": "Beleg entfernen",
+    "receiptShrinking": "Bild wird verkleinert …", "receiptError": "Das Bild konnte nicht gelesen werden.",
+    "saved": "Gespeichert", "edit": "Buchung bearbeiten", "newExpense": "Neue Ausgabe", "newIncome": "Neue Einnahme",
+    "errAmount": "Bitte einen Betrag größer 0 eingeben.", "errDate": "Bitte ein gültiges Datum wählen.", "errRequired": "Bitte ausfüllen."
+  },
+  "detail": {
+    "title": "Buchung", "nr": "Belegnummer", "noNumber": "wird beim nächsten Sync vergeben", "in": "Einnahme", "out": "Ausgabe",
+    "receipt": "Beleg", "zoomHint": "Tippen zum Vergrößern", "receiptUnavailable": "Beleg gerade nicht verfügbar",
+    "siblings": "Weitere Buchungen desselben Belegs", "confirmDelete": "Diese Buchung in den Papierkorb legen?",
+    "trashed": "In den Papierkorb gelegt", "gone": "Diese Buchung gibt es nicht mehr.",
+    "rejected": "Vom Server abgelehnt"
+  },
+  "trash": {
+    "title": "Papierkorb", "empty": "Der Papierkorb ist leer.", "restore": "Wiederherstellen", "purge": "Endgültig löschen",
+    "emptyAll": "Papierkorb leeren", "deletedOn": "Gelöscht am {d}",
+    "onlineOnly": "Endgültig löschen geht nur mit Verbindung zum Server.",
+    "confirmPurge": "Diese Buchung endgültig löschen? Das lässt sich nicht rückgängig machen.",
+    "confirmEmpty": "Alle Buchungen im Papierkorb endgültig löschen?"
+  },
+  "settings": {
+    "title": "Einstellungen", "general": "Allgemein", "groupName": "Gruppenname", "saved": "Gespeichert",
+    "needUnlock": "Zum Ändern entsperren.", "needOnline": "Ändern geht nur mit Verbindung zum Server.",
+    "appearance": "Darstellung", "appearanceLocal": "Gilt nur für dieses Gerät.",
+    "mode": { "auto": "Auto", "light": "Hell", "dark": "Dunkel" },
+    "accent": "Akzentfarbe",
+    "accents": { "green": "Grün", "blue": "Blau", "purple": "Violett", "red": "Rot", "orange": "Orange", "gray": "Grau" },
+    "amounts": "Farben für Beträge",
+    "scheme": { "classic": "Klassisch (grün/rot)", "cb": "Farbsehschwäche (blau/orange)", "icons": "Nur Symbole" },
+    "access": "Zugriff", "changePin": "PIN ändern",
+    "readNoPin": "Lesen ohne PIN", "readNoPinHint": "Quitt startet nur lesend. Zum Bearbeiten tippst du auf das Schloss.",
+    "lockNow": "Jetzt sperren", "lockConfirm": "Quitt auf diesem Gerät sperren? Zum Bearbeiten brauchst du danach wieder die PIN.",
+    "lockPending": "Es sind noch {n} Änderungen nicht übertragen. Sie bleiben auf diesem Gerät und werden nach dem nächsten Entsperren übertragen. Trotzdem sperren?",
+    "recognition": "Belegerkennung", "backup": "Datensicherung", "update": "Update", "version": "Version",
+    "diagnose": "Diagnose", "more": "Mehr", "about": "Über Quitt"
+  },
+  "update": {
+    "ready": "Eine neue Version von Quitt ist bereit.", "reload": "Jetzt laden"
+  },
+  "placeholder": {
+    "text": "Dieser Bereich folgt in einem der nächsten Schritte."
+  },
+  "about": { "license": "Lizenz", "credits": "Credits" },
+  "help": { "title": "Hilfe" },
+  "errors": {
+    "network": "Keine Verbindung zum Server. Bitte prüfe dein Netz.",
+    "unauthorized": "Bitte melde dich erneut mit deiner PIN an.",
+    "pin_required": "Zum Bearbeiten brauchst du die PIN.",
+    "rate_limited": "Zu viele Versuche. Bitte warte kurz.",
+    "not_found": "Nicht gefunden.",
+    "validation_failed": "Bitte prüfe deine Eingaben.",
+    "not_installed": "Quitt ist noch nicht eingerichtet.",
+    "server_error": "Auf dem Server ist ein Fehler aufgetreten.",
+    "unknown": "Etwas ist schiefgelaufen. Bitte versuch es noch einmal."
+  }
+}

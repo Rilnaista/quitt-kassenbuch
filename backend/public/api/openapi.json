@@ -1,0 +1,2538 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "title": "Quitt API",
+        "version": "1",
+        "description": "Kassenbuch für kleine Gemeinschaftskassen. Basis: `<base>/api/v1` (Installationspfad wird nie fest verdrahtet).\n\n* JSON UTF-8, Beträge in ganzen Cent, Datum `YYYY-MM-DD`, Zeitstempel ISO-8601 UTC, IDs UUIDv4 (vom Client).\n* Fehlerformat: `{ \"error\": { \"code\", \"message\" } }`.\n* Alle Antworten: `Cache-Control: no-store`.\n* `x-quitt-access` je Operation: public (ohne Auth, auch vor Einrichtung), open (ohne Auth, nach Einrichtung), read (Token oder Lesen ohne PIN), write (Token; ohne Token 403 pin_required bei Lesen ohne PIN, sonst 401), private (immer Token). `x-quitt-ticket`: zusätzlich `?ticket=` aus POST /downloads.\n* Solange keine PIN gesetzt ist, liefern alle nicht-public Endpunkte 503 not_installed.",
+        "license": {
+            "name": "AGPL-3.0-or-later",
+            "url": "https://www.gnu.org/licenses/agpl-3.0.html"
+        }
+    },
+    "servers": [
+        {
+            "url": ".",
+            "description": "Relativ zum Ort dieser Datei (<base>/api/v1)"
+        }
+    ],
+    "tags": [
+        {
+            "name": "System"
+        },
+        {
+            "name": "Auth"
+        },
+        {
+            "name": "Sync"
+        },
+        {
+            "name": "Papierkorb"
+        },
+        {
+            "name": "Belege"
+        },
+        {
+            "name": "Einstellungen"
+        },
+        {
+            "name": "Downloads"
+        },
+        {
+            "name": "Kontoauszug"
+        },
+        {
+            "name": "Sicherung"
+        },
+        {
+            "name": "Update"
+        },
+        {
+            "name": "Protokoll"
+        }
+    ],
+    "paths": {
+        "/health": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Lebenszeichen",
+                "security": [],
+                "x-quitt-access": "public",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ok",
+                                        "version"
+                                    ],
+                                    "properties": {
+                                        "ok": {
+                                            "type": "boolean"
+                                        },
+                                        "version": {
+                                            "type": "string",
+                                            "example": "0.1.0"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "getHealth",
+                "x-quitt-ticket": false
+            }
+        },
+        "/system/info": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Systeminformationen für App und Setup",
+                "security": [],
+                "x-quitt-access": "public",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "version",
+                                        "installed",
+                                        "https",
+                                        "docker",
+                                        "base_path",
+                                        "read_without_pin",
+                                        "group_name"
+                                    ],
+                                    "properties": {
+                                        "version": {
+                                            "type": "string"
+                                        },
+                                        "installed": {
+                                            "type": "boolean"
+                                        },
+                                        "https": {
+                                            "type": "boolean"
+                                        },
+                                        "docker": {
+                                            "type": "boolean"
+                                        },
+                                        "base_path": {
+                                            "type": "string",
+                                            "example": "/kasse/",
+                                            "description": "Installationspfad mit abschließendem /"
+                                        },
+                                        "read_without_pin": {
+                                            "type": "boolean"
+                                        },
+                                        "group_name": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "getSystemInfo",
+                "x-quitt-ticket": false
+            }
+        },
+        "/openapi.json": {
+            "get": {
+                "tags": [
+                    "System"
+                ],
+                "summary": "Diese OpenAPI-Beschreibung",
+                "security": [],
+                "x-quitt-access": "public",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "operationId": "getOpenapiJson",
+                "x-quitt-ticket": false
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Anmelden mit PIN",
+                "description": "Ab 5 Fehlversuchen exponentielle Sperre (30 s, 60 s, 120 s … max. 1 h), Zähler pro Installation.",
+                "security": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "pin"
+                                ],
+                                "properties": {
+                                    "pin": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4,8}$"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-quitt-access": "open",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Token"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimited"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postAuthLogin",
+                "x-quitt-ticket": false
+            }
+        },
+        "/auth/status": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Anmeldestatus",
+                "description": "Ungültiges/abgelaufenes Token ergibt authenticated=false (kein 401).",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {}
+                ],
+                "x-quitt-access": "open",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "authenticated",
+                                        "read_without_pin"
+                                    ],
+                                    "properties": {
+                                        "authenticated": {
+                                            "type": "boolean"
+                                        },
+                                        "read_without_pin": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getAuthStatus",
+                "x-quitt-ticket": false
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Abmelden (Token wird ungültig)",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "x-quitt-access": "private",
+                "responses": {
+                    "204": {
+                        "description": "Erfolgreich, kein Inhalt"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postAuthLogout",
+                "x-quitt-ticket": false
+            }
+        },
+        "/auth/pin": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "PIN ändern",
+                "description": "PIN = 4–8 Ziffern. Falsche alte PIN -> 422 mit fields.old_pin (zählt als Fehlversuch). Andere Tokens bleiben gültig.",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "old_pin",
+                                    "new_pin"
+                                ],
+                                "properties": {
+                                    "old_pin": {
+                                        "type": "string"
+                                    },
+                                    "new_pin": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4,8}$"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-quitt-access": "write",
+                "responses": {
+                    "204": {
+                        "description": "Erfolgreich, kein Inhalt"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimited"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postAuthPin",
+                "x-quitt-ticket": false
+            }
+        },
+        "/auth/reset": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Liegt eine reset-pin-Datei im Datenordner?",
+                "security": [],
+                "x-quitt-access": "open",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "reset_file_present"
+                                    ],
+                                    "properties": {
+                                        "reset_file_present": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getAuthReset",
+                "x-quitt-ticket": false
+            },
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "PIN zurücksetzen",
+                "description": "Erlaubt mit gültigem recovery_code ODER wenn <data>/reset-pin existiert (wird danach gelöscht). Rate-Limit wie Login. Alle alten Tokens werden ungültig.",
+                "security": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "new_pin"
+                                ],
+                                "properties": {
+                                    "recovery_code": {
+                                        "type": "string"
+                                    },
+                                    "new_pin": {
+                                        "type": "string",
+                                        "pattern": "^\\d{4,8}$"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-quitt-access": "open",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "recovery_code",
+                                        "token",
+                                        "expires_at"
+                                    ],
+                                    "properties": {
+                                        "recovery_code": {
+                                            "type": "string",
+                                            "description": "Neuer Wiederherstellungscode (nur jetzt sichtbar)",
+                                            "example": "ABCD-EFGH-JKMN-PQRS"
+                                        },
+                                        "token": {
+                                            "type": "string"
+                                        },
+                                        "expires_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-10-13T09:30:00.000Z"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "429": {
+                        "$ref": "#/components/responses/RateLimited"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postAuthReset",
+                "x-quitt-ticket": false
+            }
+        },
+        "/sync": {
+            "get": {
+                "tags": [
+                    "Sync"
+                ],
+                "summary": "Änderungen seit einem Stand abholen",
+                "description": "Enthält auch Papierkorb-Einträge (deleted_at gesetzt) und endgültig gelöschte IDs (purged).",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {}
+                ],
+                "parameters": [
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "default": 0
+                        },
+                        "description": "0 = alles"
+                    }
+                ],
+                "x-quitt-access": "read",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "entries",
+                                        "receipts",
+                                        "purged",
+                                        "cursor",
+                                        "server_time"
+                                    ],
+                                    "properties": {
+                                        "entries": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Entry"
+                                            }
+                                        },
+                                        "receipts": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Receipt"
+                                            }
+                                        },
+                                        "purged": {
+                                            "type": "object",
+                                            "required": [
+                                                "entries",
+                                                "receipts"
+                                            ],
+                                            "properties": {
+                                                "entries": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    }
+                                                },
+                                                "receipts": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "cursor": {
+                                            "type": "integer",
+                                            "description": "Höchste Version; als nächstes since verwenden"
+                                        },
+                                        "server_time": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2026-10-13T09:30:00.000Z"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getSync",
+                "x-quitt-ticket": false
+            },
+            "post": {
+                "tags": [
+                    "Sync"
+                ],
+                "summary": "Buchungen hochladen (Upsert, Last-Write-Wins)",
+                "description": "Max. 500 Einträge. Atomar: ist ein Eintrag ungültig, wird nichts gespeichert (422, fields je id). Wiederherstellen = deleted_at null senden. receipt_id muss existieren. Endgültig gelöschte IDs werden nicht wiederbelebt (still übergangen).",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "entries"
+                                ],
+                                "properties": {
+                                    "entries": {
+                                        "type": "array",
+                                        "maxItems": 500,
+                                        "items": {
+                                            "$ref": "#/components/schemas/EntryInput"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-quitt-access": "write",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "applied",
+                                        "conflicts",
+                                        "cursor"
+                                    ],
+                                    "properties": {
+                                        "applied": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Entry"
+                                            },
+                                            "description": "Gespeicherter Serverstand (mit number/version)"
+                                        },
+                                        "conflicts": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "required": [
+                                                    "id",
+                                                    "server"
+                                                ],
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "string",
+                                                        "format": "uuid"
+                                                    },
+                                                    "server": {
+                                                        "$ref": "#/components/schemas/Entry"
+                                                    }
+                                                }
+                                            },
+                                            "description": "Server-Stand war neuer; Client übernimmt ihn"
+                                        },
+                                        "cursor": {
+                                            "type": "integer",
+                                            "description": "Aktueller Serverstand. Fremde Änderungen dazwischen weiterhin per GET /sync?since=<letzter GET-cursor> holen."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postSync",
+                "x-quitt-ticket": false
+            }
+        },
+        "/entries/{id}": {
+            "delete": {
+                "tags": [
+                    "Papierkorb"
+                ],
+                "summary": "Buchung endgültig löschen",
+                "description": "Nur wenn deleted_at gesetzt. Verwaiste Belege werden mit entfernt.",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Entry-id"
+                    }
+                ],
+                "x-quitt-access": "write",
+                "responses": {
+                    "204": {
+                        "description": "Erfolgreich, kein Inhalt"
+                    },
+                    "409": {
+                        "description": "Buchung liegt nicht im Papierkorb – code not_in_trash",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "deleteEntriesId",
+                "x-quitt-ticket": false
+            }
+        },
+        "/trash/empty": {
+            "post": {
+                "tags": [
+                    "Papierkorb"
+                ],
+                "summary": "Papierkorb leeren",
+                "description": "Entfernt auch Belege ohne verweisende Buchung (unverknüpfte Uploads erst nach 24 h) und verwaiste Belegdateien.",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "x-quitt-access": "write",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "purged"
+                                    ],
+                                    "properties": {
+                                        "purged": {
+                                            "type": "integer",
+                                            "description": "Anzahl endgültig gelöschter Buchungen"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postTrashEmpty",
+                "x-quitt-ticket": false
+            }
+        },
+        "/receipts/{id}": {
+            "put": {
+                "tags": [
+                    "Belege"
+                ],
+                "summary": "Beleg hochladen (idempotent)",
+                "description": "multipart/form-data, Feld file, max. 5 MB, JPEG/PNG/WebP (Erkennung am Dateiinhalt). Gleicher Inhalt erneut -> 200 unverändert.",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Receipt-id (vom Client)"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-quitt-access": "write",
+                "responses": {
+                    "201": {
+                        "description": "Neu angelegt",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Receipt"
+                                }
+                            }
+                        }
+                    },
+                    "200": {
+                        "description": "Bereits vorhanden / ersetzt",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Receipt"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "putReceiptsId",
+                "x-quitt-ticket": false
+            }
+        },
+        "/receipts/{id}/file": {
+            "get": {
+                "tags": [
+                    "Belege"
+                ],
+                "summary": "Belegdatei",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "downloadTicket": []
+                    },
+                    {}
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Receipt-id"
+                    },
+                    {
+                        "$ref": "#/components/parameters/Ticket"
+                    }
+                ],
+                "x-quitt-ticket": true,
+                "x-quitt-access": "read",
+                "responses": {
+                    "200": {
+                        "description": "Bilddatei",
+                        "content": {
+                            "image/jpeg": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            },
+                            "image/png": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            },
+                            "image/webp": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getReceiptsIdFile"
+            }
+        },
+        "/receipts/{id}/recognize": {
+            "post": {
+                "tags": [
+                    "Belege"
+                ],
+                "summary": "Beleg per KI-Dienst erkennen",
+                "description": "Nur bei recognition_mode=ai (lokal läuft komplett im Frontend).",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Receipt-id"
+                    }
+                ],
+                "x-quitt-access": "write",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RecognitionResult"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "recognition_mode ist nicht ai – code recognition_disabled",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Fehler des KI-Dienstes – code provider_error, verständliche message",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postReceiptsIdRecognize",
+                "x-quitt-ticket": false
+            }
+        },
+        "/settings": {
+            "get": {
+                "tags": [
+                    "Einstellungen"
+                ],
+                "summary": "Einstellungen lesen",
+                "description": "Liefert nie ai_key, sondern ai_key_set.",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {}
+                ],
+                "x-quitt-access": "read",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Settings"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getSettings",
+                "x-quitt-ticket": false
+            },
+            "put": {
+                "tags": [
+                    "Einstellungen"
+                ],
+                "summary": "Einstellungen ändern (teilweise)",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SettingsPatch"
+                            }
+                        }
+                    }
+                },
+                "x-quitt-access": "write",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Settings"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "putSettings",
+                "x-quitt-ticket": false
+            }
+        },
+        "/settings/recognition/test": {
+            "post": {
+                "tags": [
+                    "Einstellungen"
+                ],
+                "summary": "Verbindung zum KI-Dienst testen",
+                "description": "Fehlender ai_key = gespeicherter Schlüssel.",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "ai_provider"
+                                ],
+                                "properties": {
+                                    "ai_provider": {
+                                        "type": "string",
+                                        "enum": [
+                                            "mistral",
+                                            "openai",
+                                            "anthropic",
+                                            "gemini",
+                                            "ollama"
+                                        ]
+                                    },
+                                    "ai_model": {
+                                        "type": "string"
+                                    },
+                                    "ai_base_url": {
+                                        "type": "string"
+                                    },
+                                    "ai_key": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-quitt-access": "write",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ok",
+                                        "message"
+                                    ],
+                                    "properties": {
+                                        "ok": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Deutscher Klartext"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postSettingsRecognitionTest",
+                "x-quitt-ticket": false
+            }
+        },
+        "/settings/ai-providers": {
+            "get": {
+                "tags": [
+                    "Einstellungen"
+                ],
+                "summary": "Verfügbare KI-Anbieter",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {}
+                ],
+                "x-quitt-access": "read",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AiProvider"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getSettingsAiProviders",
+                "x-quitt-ticket": false
+            }
+        },
+        "/downloads": {
+            "post": {
+                "tags": [
+                    "Downloads"
+                ],
+                "summary": "Einmal-Ticket für einen Download",
+                "description": "Ziele: receipt (params.id; auch bei Lesen ohne PIN), statement (params.from/to; auch bei Lesen ohne PIN), backup und diagnostics (nur mit Token).",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {}
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "target"
+                                ],
+                                "properties": {
+                                    "target": {
+                                        "type": "string",
+                                        "enum": [
+                                            "statement",
+                                            "backup",
+                                            "diagnostics",
+                                            "receipt"
+                                        ]
+                                    },
+                                    "params": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-quitt-access": "open",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "url"
+                                    ],
+                                    "properties": {
+                                        "url": {
+                                            "type": "string",
+                                            "description": "Relativ zu <base>, 120 s gültig, einmal verwendbar",
+                                            "example": "api/v1/receipts/0f8c…/file?ticket=…"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postDownloads",
+                "x-quitt-ticket": false
+            }
+        },
+        "/statement.pdf": {
+            "get": {
+                "tags": [
+                    "Kontoauszug"
+                ],
+                "summary": "Kontoauszug als PDF",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "downloadTicket": []
+                    },
+                    {}
+                ],
+                "x-quitt-ticket": true,
+                "parameters": [
+                    {
+                        "name": "from",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "$ref": "#/components/parameters/Ticket"
+                    }
+                ],
+                "x-quitt-access": "read",
+                "responses": {
+                    "200": {
+                        "description": "PDF (A4, Bankstil)",
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getStatementPdf"
+            }
+        },
+        "/backup": {
+            "get": {
+                "tags": [
+                    "Sicherung"
+                ],
+                "summary": "Sicherung herunterladen (ZIP)",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "downloadTicket": []
+                    }
+                ],
+                "x-quitt-ticket": true,
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Ticket"
+                    }
+                ],
+                "x-quitt-access": "private",
+                "responses": {
+                    "200": {
+                        "description": "quitt-sicherung-<datum>.zip (Datenbank, Belege, Settings inkl. Schlüssel, manifest.json)",
+                        "content": {
+                            "application/zip": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getBackup"
+            }
+        },
+        "/restore": {
+            "post": {
+                "tags": [
+                    "Sicherung"
+                ],
+                "summary": "Sicherung einspielen",
+                "description": "Vorher automatische Sicherung. Ältere Versionen werden migriert; neuere -> 422 backup_too_new.",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-quitt-access": "write",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RestoreResult"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postRestore",
+                "x-quitt-ticket": false
+            }
+        },
+        "/backups": {
+            "get": {
+                "tags": [
+                    "Sicherung"
+                ],
+                "summary": "Automatische Sicherungen (max. 10)",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "x-quitt-access": "private",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/BackupInfo"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getBackups",
+                "x-quitt-ticket": false
+            }
+        },
+        "/backups/{name}/restore": {
+            "post": {
+                "tags": [
+                    "Sicherung"
+                ],
+                "summary": "Automatische Sicherung einspielen",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "x-quitt-access": "write",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RestoreResult"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/NotFound"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postBackupsNameRestore",
+                "x-quitt-ticket": false
+            }
+        },
+        "/update/check": {
+            "get": {
+                "tags": [
+                    "Update"
+                ],
+                "summary": "Nach neuer Fassung suchen",
+                "description": "Quelle: GitHub Releases des Repos aus der Konfiguration (`update_repo`), inkl. Pre-Releases. Ergebnis 6 h gecacht (Fehler 30 min). Fehler beim Abruf bleiben still: `available: false`, `latest: null`, Eintrag im Protokoll. Nur angemeldet (Token).",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "x-quitt-access": "write",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "current",
+                                        "latest",
+                                        "available",
+                                        "notes",
+                                        "published_at",
+                                        "docker"
+                                    ],
+                                    "properties": {
+                                        "current": {
+                                            "type": "string"
+                                        },
+                                        "latest": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "available": {
+                                            "type": "boolean"
+                                        },
+                                        "notes": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "published_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "nullable": true
+                                        },
+                                        "docker": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getUpdateCheck",
+                "x-quitt-ticket": false
+            }
+        },
+        "/update/apply": {
+            "post": {
+                "tags": [
+                    "Update"
+                ],
+                "summary": "Update einspielen",
+                "description": "Sicherung (`before_update`) -> Paket `quitt-X.Y.Z.zip` + `.sha256` laden -> SHA-256 prüfen -> in Temp-Ordner entpacken -> App-Dateien ersetzen (Datenordner, `setup.php` und `app/config.local.php` bleiben unberührt) -> Migrationen; bei jedem Fehler Rückkehr zum alten Stand (Dateien + Datenbank) -> 500 `update_failed` mit erklärender `message`. Nur im Release-Layout möglich. Docker -> 409 `docker_managed`.",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "x-quitt-access": "write",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "ok",
+                                        "from",
+                                        "to"
+                                    ],
+                                    "properties": {
+                                        "ok": {
+                                            "type": "boolean"
+                                        },
+                                        "from": {
+                                            "type": "string"
+                                        },
+                                        "to": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/PinRequired"
+                    },
+                    "409": {
+                        "description": "Docker-Installation – code docker_managed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Update fehlgeschlagen, alter Stand wiederhergestellt – code update_failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "postUpdateApply",
+                "x-quitt-ticket": false
+            }
+        },
+        "/logs": {
+            "get": {
+                "tags": [
+                    "Protokoll"
+                ],
+                "summary": "Protokoll lesen",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "level",
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "error",
+                                "warning",
+                                "info"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 200
+                        }
+                    }
+                ],
+                "x-quitt-access": "private",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/LogEntry"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getLogs",
+                "x-quitt-ticket": false
+            }
+        },
+        "/diagnostics": {
+            "get": {
+                "tags": [
+                    "Protokoll"
+                ],
+                "summary": "Diagnosepaket (ohne Geheimnisse)",
+                "description": "Enthält nie PIN-Hash, Tokens, Wiederherstellungscode oder ai_key.",
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "downloadTicket": []
+                    }
+                ],
+                "x-quitt-ticket": true,
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/Ticket"
+                    }
+                ],
+                "x-quitt-access": "private",
+                "responses": {
+                    "200": {
+                        "description": "quitt-diagnose-<datum>.json",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "required": [
+                                        "format",
+                                        "meta",
+                                        "checks",
+                                        "logs"
+                                    ],
+                                    "properties": {
+                                        "format": {
+                                            "type": "string",
+                                            "example": "quitt-diagnostics/1"
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        },
+                                        "checks": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "ok": {
+                                                        "type": "boolean"
+                                                    },
+                                                    "detail": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "logs": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/LogEntry"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "503": {
+                        "$ref": "#/components/responses/NotInstalled"
+                    }
+                },
+                "operationId": "getDiagnostics"
+            }
+        },
+        "/logs/client": {
+            "post": {
+                "tags": [
+                    "Protokoll"
+                ],
+                "summary": "Fehler aus der App protokollieren",
+                "description": "Ohne Auth, gedrosselt (Überschuss wird still verworfen, Antwort trotzdem 204).",
+                "security": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "level",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "level": {
+                                        "type": "string",
+                                        "enum": [
+                                            "error",
+                                            "warning",
+                                            "info"
+                                        ]
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "maxLength": 2000
+                                    },
+                                    "context": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-quitt-access": "public",
+                "responses": {
+                    "204": {
+                        "description": "Erfolgreich, kein Inhalt"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/BadRequest"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationFailed"
+                    }
+                },
+                "operationId": "postLogsClient",
+                "x-quitt-ticket": false
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "description": "Token aus /auth/login, gleitend 365 Tage gültig"
+            },
+            "downloadTicket": {
+                "type": "apiKey",
+                "in": "query",
+                "name": "ticket",
+                "description": "Einmal-Ticket aus POST /downloads (120 s)"
+            }
+        },
+        "parameters": {
+            "Ticket": {
+                "name": "ticket",
+                "in": "query",
+                "required": false,
+                "schema": {
+                    "type": "string"
+                },
+                "description": "Einmal-Ticket aus POST /downloads"
+            }
+        },
+        "schemas": {
+            "Error": {
+                "type": "object",
+                "required": [
+                    "error"
+                ],
+                "properties": {
+                    "error": {
+                        "type": "object",
+                        "required": [
+                            "code",
+                            "message"
+                        ],
+                        "properties": {
+                            "code": {
+                                "type": "string",
+                                "example": "validation_failed",
+                                "description": "snake_case, u. a. unauthorized, pin_required, validation_failed, not_found, not_in_trash, rate_limited, recognition_disabled, provider_error, docker_managed, not_installed, not_implemented, backup_too_new, update_failed, bad_request, internal_error"
+                            },
+                            "message": {
+                                "type": "string",
+                                "description": "Deutscher Klartext für Nutzer",
+                                "example": "Bitte die markierten Angaben prüfen."
+                            },
+                            "fields": {
+                                "type": "object",
+                                "additionalProperties": true,
+                                "description": "Nur bei validation_failed: Feld -> Meldung. Bei POST /sync: Entry-id -> { Feld -> Meldung }."
+                            },
+                            "retry_after": {
+                                "type": "integer",
+                                "description": "Nur bei rate_limited: Wartezeit in Sekunden"
+                            }
+                        }
+                    }
+                }
+            },
+            "Entry": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "number",
+                    "type",
+                    "date",
+                    "amount_cents",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                    "version"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "UUIDv4, vom Client erzeugt"
+                    },
+                    "number": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "Fortlaufende Belegnummer, vom Server beim ersten Speichern vergeben, nie wiederverwendet"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "in",
+                            "out"
+                        ]
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "amount_cents": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "Ganze Cent, > 0; Vorzeichen ergibt sich aus type"
+                    },
+                    "purpose": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 200,
+                        "description": "Verwendungszweck (nur in, dort Pflicht)"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 200,
+                        "description": "Grund (nur out, dort Pflicht)"
+                    },
+                    "category": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 200,
+                        "description": "Kategorie (nur out, dort Pflicht)"
+                    },
+                    "item": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 200,
+                        "description": "Bezug (nur out, dort Pflicht)"
+                    },
+                    "receipt_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Nur out; Beleg muss vorher hochgeladen sein"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-13T09:30:00.000Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-13T09:30:00.000Z",
+                        "description": "Setzt der Client bei jeder Änderung (Last-Write-Wins)"
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true,
+                        "description": "Gesetzt = im Papierkorb"
+                    },
+                    "version": {
+                        "type": "integer",
+                        "description": "Globaler Server-Änderungszähler"
+                    }
+                }
+            },
+            "EntryInput": {
+                "type": "object",
+                "description": "Entry ohne number/version (werden ignoriert). Felder, die nicht zum type passen, setzt der Server auf null.",
+                "required": [
+                    "id",
+                    "type",
+                    "date",
+                    "amount_cents",
+                    "created_at",
+                    "updated_at"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "in",
+                            "out"
+                        ]
+                    },
+                    "date": {
+                        "type": "string",
+                        "format": "date"
+                    },
+                    "amount_cents": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "purpose": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 200
+                    },
+                    "reason": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 200
+                    },
+                    "category": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 200
+                    },
+                    "item": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 200
+                    },
+                    "receipt_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-13T09:30:00.000Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-13T09:30:00.000Z"
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                }
+            },
+            "Receipt": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "mime",
+                    "size",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                    "version"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "mime": {
+                        "type": "string",
+                        "enum": [
+                            "image/jpeg",
+                            "image/png",
+                            "image/webp"
+                        ]
+                    },
+                    "size": {
+                        "type": "integer",
+                        "description": "Bytes"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-13T09:30:00.000Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-13T09:30:00.000Z"
+                    },
+                    "deleted_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true,
+                        "description": "Gesetzt, solange alle verweisenden Buchungen im Papierkorb liegen"
+                    },
+                    "version": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "Settings": {
+                "type": "object",
+                "properties": {
+                    "group_name": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "example": "Unsere Kasse"
+                    },
+                    "read_without_pin": {
+                        "type": "boolean"
+                    },
+                    "recognition_mode": {
+                        "type": "string",
+                        "enum": [
+                            "off",
+                            "local",
+                            "ai"
+                        ]
+                    },
+                    "ai_provider": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "mistral",
+                            "openai",
+                            "anthropic",
+                            "gemini",
+                            "ollama",
+                            null
+                        ]
+                    },
+                    "ai_model": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "null = Standardmodell des Anbieters"
+                    },
+                    "ai_base_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": "http://192.168.1.5:11434",
+                        "description": "Nur ollama"
+                    },
+                    "ai_key_set": {
+                        "type": "boolean",
+                        "description": "Ob ein Schlüssel gespeichert ist (der Schlüssel selbst wird nie ausgeliefert)"
+                    }
+                }
+            },
+            "SettingsPatch": {
+                "type": "object",
+                "description": "Teilweise Änderung; unbekannte Felder -> 422. ai_key_set wird ignoriert.",
+                "properties": {
+                    "group_name": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "read_without_pin": {
+                        "type": "boolean"
+                    },
+                    "recognition_mode": {
+                        "type": "string",
+                        "enum": [
+                            "off",
+                            "local",
+                            "ai"
+                        ]
+                    },
+                    "ai_provider": {
+                        "type": "string",
+                        "nullable": true,
+                        "enum": [
+                            "mistral",
+                            "openai",
+                            "anthropic",
+                            "gemini",
+                            "ollama",
+                            null
+                        ]
+                    },
+                    "ai_model": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "ai_base_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "ai_key": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "description": "Nur schreibbar; \"\" löscht den Schlüssel"
+                    }
+                }
+            },
+            "AiProvider": {
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "needs_key",
+                    "needs_base_url",
+                    "default_model"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "enum": [
+                            "mistral",
+                            "openai",
+                            "anthropic",
+                            "gemini",
+                            "ollama"
+                        ]
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "needs_key": {
+                        "type": "boolean"
+                    },
+                    "needs_base_url": {
+                        "type": "boolean"
+                    },
+                    "default_model": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                }
+            },
+            "Token": {
+                "type": "object",
+                "required": [
+                    "token",
+                    "expires_at"
+                ],
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "description": "Bearer-Token; gleitend 365 Tage gültig"
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-13T09:30:00.000Z"
+                    }
+                }
+            },
+            "RecognitionResult": {
+                "type": "object",
+                "required": [
+                    "date",
+                    "positions",
+                    "total_cents",
+                    "provider"
+                ],
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "format": "date",
+                        "nullable": true
+                    },
+                    "positions": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "item",
+                                "amount_cents"
+                            ],
+                            "properties": {
+                                "item": {
+                                    "type": "string"
+                                },
+                                "amount_cents": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    },
+                    "total_cents": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "provider": {
+                        "type": "string"
+                    }
+                }
+            },
+            "RestoreResult": {
+                "type": "object",
+                "required": [
+                    "ok",
+                    "entries",
+                    "receipts"
+                ],
+                "properties": {
+                    "ok": {
+                        "type": "boolean"
+                    },
+                    "entries": {
+                        "type": "integer"
+                    },
+                    "receipts": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "BackupInfo": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "created_at",
+                    "size",
+                    "reason"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-13T09:30:00.000Z"
+                    },
+                    "size": {
+                        "type": "integer"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "enum": [
+                            "manual",
+                            "before_update",
+                            "before_restore",
+                            "before_migration"
+                        ]
+                    }
+                }
+            },
+            "LogEntry": {
+                "type": "object",
+                "required": [
+                    "ts",
+                    "level",
+                    "channel",
+                    "message",
+                    "context"
+                ],
+                "properties": {
+                    "ts": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-10-13T09:30:00.000Z"
+                    },
+                    "level": {
+                        "type": "string"
+                    },
+                    "channel": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "context": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                }
+            }
+        },
+        "responses": {
+            "BadRequest": {
+                "description": "Ungültige Anfrage (z. B. kein JSON-Objekt) – code bad_request",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "Unauthorized": {
+                "description": "Nicht angemeldet / Token ungültig / PIN falsch – code unauthorized",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "PinRequired": {
+                "description": "Lesen ohne PIN aktiv, Schreiben braucht PIN – code pin_required",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "NotFound": {
+                "description": "Nicht gefunden – code not_found",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "ValidationFailed": {
+                "description": "Validierung fehlgeschlagen – code validation_failed, mit fields",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "RateLimited": {
+                "description": "Zu viele Fehlversuche – code rate_limited, mit retry_after",
+                "headers": {
+                    "Retry-After": {
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            },
+            "NotInstalled": {
+                "description": "Noch nicht eingerichtet (keine PIN gesetzt) – code not_installed",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/Error"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

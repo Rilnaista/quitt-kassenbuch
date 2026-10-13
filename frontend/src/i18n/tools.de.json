@@ -1,0 +1,97 @@
+{
+  "stmt": {
+    "title": "Kontoauszug",
+    "period": "Zeitraum",
+    "preset": { "all": "Alles", "thisYear": "Dieses Jahr", "lastMonth": "Letzter Monat", "custom": "Frei" },
+    "from": "Von", "to": "Bis",
+    "summary": "{n} Buchungen im Zeitraum",
+    "summaryOne": "1 Buchung im Zeitraum",
+    "opening": "Anfangssaldo", "closing": "Endsaldo",
+    "create": "PDF erstellen",
+    "creating": "PDF wird erstellt …",
+    "invalid": "Bitte einen gültigen Zeitraum wählen (Von nicht nach Bis).",
+    "offline": "Zum Erstellen des Kontoauszugs brauchst du eine Verbindung zum Server. Du bist gerade offline.",
+    "needPin": "Zum Erstellen des Kontoauszugs musst du entsperrt sein.",
+    "unlock": "Entsperren",
+    "openHint": "Falls sich nichts öffnet, erlaube Pop-ups für diese Seite und tippe noch einmal.",
+    "file": "kontoauszug-{from}-{to}.pdf"
+  },
+  "backup": {
+    "title": "Datensicherung",
+    "needPin": "Die Datensicherung ist nur mit PIN verfügbar. Entsperre Quitt, um sie zu nutzen.",
+    "offline": "Für die Datensicherung brauchst du eine Verbindung zum Server. Du bist gerade offline.",
+    "downloadTitle": "Sicherung herunterladen",
+    "downloadText": "Eine ZIP-Datei mit allen Buchungen, Belegen und Einstellungen – inklusive KI-Schlüssel. Bewahre sie sicher auf.",
+    "download": "Sicherung herunterladen",
+    "restoreTitle": "Sicherung einspielen",
+    "restoreText": "Ersetzt alle Daten auf dem Server durch den Stand der Sicherung. Vorher legt Quitt automatisch eine Sicherung des aktuellen Stands an.",
+    "restore": "Sicherung einspielen …",
+    "confirmFile": "Alle aktuellen Daten werden durch „{name}“ ersetzt. Nicht übertragene Änderungen auf diesem Gerät gehen verloren. Wirklich einspielen?",
+    "confirmTitle": "Sicherung einspielen?",
+    "restoring": "Sicherung wird eingespielt …",
+    "done": "Sicherung eingespielt: {entries} Buchungen, {receipts} Belege.",
+    "autoTitle": "Automatische Sicherungen",
+    "autoText": "Quitt sichert sich selbst vor Updates, Migrationen und dem Einspielen. Die letzten 10 bleiben erhalten.",
+    "autoEmpty": "Noch keine automatischen Sicherungen.",
+    "back": "Auf diesen Stand zurück",
+    "confirmBack": "Alle aktuellen Daten werden durch den Stand vom {d} ersetzt. Nicht übertragene Änderungen auf diesem Gerät gehen verloren. Wirklich zurückgehen?",
+    "reason": { "manual": "Manuell", "before_update": "Vor einem Update", "before_restore": "Vor dem Einspielen", "before_migration": "Vor einer Migration" },
+    "loadError": "Die Liste konnte nicht geladen werden."
+  },
+  "upd": {
+    "title": "Update",
+    "current": "Installierte Version",
+    "latest": "Neueste Version",
+    "check": "Nach Update suchen",
+    "checking": "Suche läuft …",
+    "upToDate": "Quitt ist auf dem neuesten Stand.",
+    "available": "Version {v} ist verfügbar.",
+    "notes": "Was ist neu?",
+    "noNotes": "Keine Hinweise zu dieser Version.",
+    "published": "Veröffentlicht am {d}",
+    "apply": "Jetzt aktualisieren",
+    "confirm": "Quitt legt zuerst eine Sicherung an und aktualisiert dann die Dateien auf dem Server. Das dauert einen Moment. Fortfahren?",
+    "applying": "Quitt wird aktualisiert … Bitte lass diese Seite geöffnet.",
+    "applyingSub": "Sicherung, Download und Prüfung laufen. Das kann bis zu einer Minute dauern.",
+    "success": "Aktualisiert auf Version {v}. Quitt lädt neu …",
+    "failed": "Das Update hat nicht geklappt. Dein bisheriger Stand ist unverändert.",
+    "interrupted": "Die Verbindung wurde unterbrochen. Prüfe in einer Minute noch einmal über „Nach Update suchen“.",
+    "dockerTitle": "Update über neues Docker-Image",
+    "dockerText": "Diese Installation läuft in Docker. Aktualisiere sie, indem du das neue Image lädst und den Container neu startest. Deine Daten bleiben erhalten.",
+    "needPin": "Updates sind nur mit PIN möglich. Entsperre Quitt, um zu prüfen oder zu aktualisieren.",
+    "offline": "Zum Prüfen brauchst du eine Verbindung zum Server."
+  },
+  "diag": {
+    "title": "Diagnose",
+    "needPin": "Protokoll und Diagnosepaket sind nur mit PIN verfügbar. Entsperre Quitt, um sie zu sehen.",
+    "offline": "Zum Laden des Protokolls brauchst du eine Verbindung zum Server.",
+    "level": { "error": "Fehler", "warning": "Warnungen", "info": "Alles" },
+    "empty": "Keine Einträge – das ist ein gutes Zeichen.",
+    "context": "Details",
+    "reload": "Aktualisieren",
+    "packageTitle": "Diagnosepaket",
+    "packageText": "Eine Datei mit Systemdaten, Prüfungen und Protokoll – ohne PIN, Schlüssel oder Wiederherstellungscode. Du kannst sie bei Problemen weitergeben.",
+    "package": "Diagnosepaket herunterladen",
+    "pageTitle": "Quitt startet nicht?",
+    "pageText": "Dann hilft die eigenständige Diagnoseseite, die auch ohne laufende App funktioniert:",
+    "pageLink": "diagnose.html öffnen",
+    "loadError": "Das Protokoll konnte nicht geladen werden."
+  },
+  "about": {
+    "slogan": "Scannen. Buchen. Quitt.",
+    "licenseText": "Quitt ist freie Software unter der GNU Affero General Public License 3.0. Du darfst es nutzen, ändern und weitergeben.",
+    "creditsText": "Quitt steht auf den Schultern dieser freien Bibliotheken (Versionen: CREDITS-Dateien im Quellcode):"
+  },
+  "notInstalled": {
+    "setup": "Zur Einrichtung (setup.php)"
+  },
+  "settings": {
+    "updateAvailable": "Update verfügbar",
+    "restoreDone": "Sicherung eingespielt"
+  },
+  "errors": {
+    "backup_too_new": "Diese Sicherung stammt von einer neueren Quitt-Version. Bitte aktualisiere zuerst Quitt.",
+    "update_failed": "Das Update hat nicht geklappt. Dein bisheriger Stand ist unverändert.",
+    "docker_managed": "Diese Installation wird über das Docker-Image aktualisiert."
+  }
+}

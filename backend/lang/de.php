@@ -1,0 +1,121 @@
+<?php
+
+/*
+ * Deutsche Texte (nutzersichtbar). Echte Umlaute und ß, UTF-8 ohne BOM.
+ * Schluessel: error.<code> = Fehlermeldung zum API-Fehlercode, validation.* = Feldmeldungen.
+ * Neue Eintraege nur ERGAENZEN (Datei wird von mehreren Schritten gepflegt); Test prueft Umlaute.
+ */
+
+return [
+    // --- Allgemein / Einstellungen ---
+    'settings.default_group_name' => 'Unsere Kasse',
+
+    // --- API-Fehler (error.<code>) ---
+    'error.unauthorized' => 'Die PIN ist falsch oder die Anmeldung ist abgelaufen.',
+    'error.pin_required' => 'Zum Bearbeiten bitte mit der PIN anmelden.',
+    'error.validation_failed' => 'Bitte die markierten Angaben prüfen.',
+    'error.not_found' => 'Nicht gefunden.',
+    'error.rate_limited' => 'Zu viele Fehlversuche. Bitte in {seconds} Sekunden erneut versuchen.',
+    'error.recognition_disabled' => 'Die Belegerkennung per KI-Dienst ist nicht eingeschaltet.',
+    'error.provider_error' => 'Der KI-Dienst hat einen Fehler gemeldet.',
+    'error.docker_managed' => 'Diese Installation läuft in Docker und wird über ein neues Image aktualisiert.',
+    'error.not_installed' => 'Quitt ist noch nicht eingerichtet.',
+    'error.not_in_trash' => 'Die Buchung liegt nicht im Papierkorb.',
+    'error.method_not_allowed' => 'Diese Aktion ist hier nicht erlaubt.',
+    'error.bad_request' => 'Die Anfrage ist ungültig.',
+    'error.invalid_json' => 'Die gesendeten Daten sind kein gültiges JSON-Objekt.',
+    'error.internal_error' => 'Ein unerwarteter Fehler ist aufgetreten. Details stehen im Protokoll.',
+    'error.not_implemented' => 'Diese Funktion ist noch nicht verfügbar.',
+    'error.data_dir_unwritable' => 'Der Datenordner ist nicht beschreibbar. Bitte die Schreibrechte prüfen.',
+
+    // --- Feldmeldungen (validation.*) ---
+    'validation.required' => 'Bitte ausfüllen.',
+    'validation.too_long' => 'Der Text ist zu lang.',
+    'validation.string' => 'Bitte einen Text angeben.',
+    'validation.boolean' => 'Bitte Ja oder Nein wählen.',
+    'validation.invalid_choice' => 'Dieser Wert ist nicht zulässig.',
+    'validation.url' => 'Bitte eine gültige Adresse angeben, z. B. http://192.168.1.5:11434.',
+    'validation.unknown_field' => 'Dieses Feld ist unbekannt.',
+    'validation.pin_format' => 'Die PIN muss aus 4 bis 8 Ziffern bestehen.',
+    'validation.old_pin_wrong' => 'Die bisherige PIN stimmt nicht.',
+    'validation.list' => 'Bitte eine Liste senden.',
+    'validation.too_many' => 'Zu viele Einträge auf einmal.',
+    'validation.object' => 'Bitte ein Objekt senden.',
+    'validation.uuid' => 'Ungültige Kennung.',
+    'validation.entry_type' => 'Bitte Einnahme oder Ausgabe wählen.',
+    'validation.date' => 'Bitte ein gültiges Datum angeben.',
+    'validation.amount' => 'Bitte einen Betrag größer als 0 angeben.',
+    'validation.timestamp' => 'Ungültiger Zeitstempel.',
+    'validation.receipt_missing' => 'Der Beleg fehlt auf dem Server. Bitte den Beleg vorher hochladen.',
+    'validation.since' => 'Ungültiger Abgleichsstand.',
+    'validation.file_too_large' => 'Die Datei ist größer als 5 MB.',
+    'validation.file_type' => 'Nur Fotos im Format JPEG, PNG oder WebP sind erlaubt.',
+
+    // --- KI-Belegerkennung (REQ-010/011) ---
+    'recognition.err_not_configured' => 'Die KI-Erkennung ist noch nicht vollständig eingerichtet (Anbieter, Schlüssel oder Serveradresse fehlen).',
+    'recognition.err_key_invalid' => 'Der Schlüssel (API-Key) ist ungültig oder hat keine Berechtigung.',
+    'recognition.err_model_unknown' => 'Das Modell ist beim Anbieter unbekannt oder nicht verfügbar. Bitte den Modellnamen prüfen.',
+    'recognition.err_unreachable' => 'Der Server ist nicht erreichbar. Bitte Adresse und Internetverbindung prüfen.',
+    'recognition.err_timeout' => 'Der KI-Dienst hat nicht rechtzeitig geantwortet. Bitte später erneut versuchen.',
+    'recognition.err_unreadable' => 'Die Antwort des KI-Dienstes war nicht lesbar. Bitte erneut versuchen oder ein anderes Modell wählen.',
+    'recognition.err_rate_limit' => 'Das Anfragelimit oder Guthaben beim KI-Anbieter ist erreicht. Bitte später erneut versuchen.',
+    'recognition.err_server' => 'Der KI-Dienst meldet eine Störung. Bitte später erneut versuchen.',
+    'recognition.err_failed' => 'Der KI-Dienst hat die Anfrage abgelehnt. Bitte Einstellungen und Modell prüfen.',
+    'recognition.test_ok' => 'Verbindung zu {provider} (Modell {model}) funktioniert.',
+    'recognition.test_no_key' => 'Für {provider} fehlt der Schlüssel (API-Key).',
+    'recognition.test_no_url' => 'Bitte die Serveradresse angeben, z. B. http://192.168.1.5:11434.',
+
+    // --- Kontoauszug (REQ-023) ---
+    'validation.date_range' => 'Das Enddatum darf nicht vor dem Startdatum liegen.',
+    'statement.title' => 'Kontoauszug',
+    'statement.period' => 'Zeitraum',
+    'statement.created' => 'Erstellt am',
+    'statement.opening' => 'Anfangssaldo',
+    'statement.carry' => 'Übertrag',
+    'statement.subtotal' => 'Zwischensaldo',
+    'statement.closing' => 'Endsaldo',
+    'statement.page' => 'Seite {page} von {pages}',
+    'statement.col.number' => 'Nr.',
+    'statement.col.date' => 'Datum',
+    'statement.col.text' => 'Text',
+    'statement.col.out' => 'Ausgang',
+    'statement.col.in' => 'Eingang',
+    'statement.col.balance' => 'Saldo',
+
+    // --- Sicherung / Diagnose (REQ-062, REQ-071) ---
+    'error.backup_too_new' => 'Diese Sicherung stammt von einer jüngeren Quitt-Version. Bitte zuerst Quitt aktualisieren.',
+    'validation.backup_invalid' => 'Das ist keine gültige Quitt-Sicherung.',
+    'validation.backup_too_large' => 'Die Sicherung ist zu groß.',
+    'diag.php_version' => 'PHP-Version (ab 8.1)',
+    'diag.extension' => 'PHP-Erweiterung {name}',
+    'diag.available' => 'vorhanden',
+    'diag.missing' => 'fehlt',
+    'diag.optional_missing' => 'nicht vorhanden (optional)',
+    'diag.data_writable' => 'Datenordner beschreibbar',
+    'diag.https' => 'Verschlüsselte Verbindung (HTTPS)',
+    'diag.free_space' => 'Freier Speicher',
+    'diag.database' => 'Datenbank',
+    'diag.schema' => 'Datenbankschema',
+    'diag.yes' => 'ja',
+    'diag.no' => 'nein',
+    'diag.no_https' => 'nein – Anmeldedaten werden unverschlüsselt übertragen',
+    'diag.megabytes' => '{mb} MB frei',
+    'diag.ok' => 'in Ordnung',
+    'diag.database_error' => 'Prüfung meldet Fehler',
+    'diag.up_to_date' => 'aktuell',
+    'diag.pending' => '{n} Migration(en) ausstehend',
+
+    // --- Update (REQ-061) ---
+    'error.update_failed' => 'Das Update ist fehlgeschlagen. Der bisherige Stand wurde wiederhergestellt.',
+    'update.err_not_release' => 'Diese Installation kann sich nicht selbst aktualisieren (kein Installationspaket). Bitte die neue Fassung von Hand einspielen.',
+    'update.err_running' => 'Es läuft bereits ein Update. Bitte einen Moment warten.',
+    'update.err_check' => 'Die Update-Quelle (GitHub) ist gerade nicht erreichbar. Bitte später erneut versuchen.',
+    'update.err_no_update' => 'Es ist bereits die aktuelle Fassung installiert.',
+    'update.err_backup' => 'Vor dem Update konnte keine Sicherung angelegt werden. Es wurde nichts verändert. Bitte freien Speicher und Schreibrechte prüfen.',
+    'update.err_download' => 'Das Update-Paket konnte nicht geladen werden. Es wurde nichts verändert. Bitte später erneut versuchen.',
+    'update.err_checksum' => 'Das Update-Paket ist beschädigt (Prüfsumme stimmt nicht). Es wurde nichts verändert.',
+    'update.err_package' => 'Das Update-Paket ist ungültig oder unvollständig. Es wurde nichts verändert.',
+    'update.err_replace' => 'Die Programmdateien konnten nicht ersetzt werden (Schreibrechte?). Der bisherige Stand wurde wiederhergestellt.',
+    'update.err_migration' => 'Die Datenbank konnte nicht auf die neue Fassung umgestellt werden. Der bisherige Stand samt Daten wurde wiederhergestellt.',
+    'update.err_verify' => 'Die neue Fassung ließ sich nicht prüfen. Der bisherige Stand wurde wiederhergestellt.',
+];

@@ -1,0 +1,177 @@
+/* Quitt – Styles (Optik aus dem abgenommenen Klickdummy prototype/) */
+:root { --q-in: #1b7a3e; --q-out: #c62828; --q-in-bg: transparent; }
+html.dark { --q-in: #5fd08a; --q-out: #ff8a80; }
+html.amt-cb { --q-in: #1565c0; --q-out: #b34700; }
+html.amt-cb.dark { --q-in: #7ab8ff; --q-out: #ffb74d; }
+
+.amt { display: inline-flex; align-items: center; gap: 3px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.amt-in { color: var(--q-in); }
+.amt-out { color: var(--q-out); }
+html.amt-icons .amt-in, html.amt-icons .amt-out { color: inherit; }
+html.amt-icons .bk-in .item-content,
+html.amt-icons .bk-in.item-content { background: color-mix(in srgb, var(--f7-theme-color) 12%, transparent); }
+.amt-lg { font-size: 15px; }
+.sub-small { font-size: 12px; opacity: 0.7; }
+
+/* Touch-Ziele */
+.touch44 { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.navbar .link.icon-only { min-width: 44px; }
+
+/* Globaler FAB */
+.global-fab { position: fixed; right: 16px; bottom: calc(var(--f7-toolbar-height, 56px) + env(safe-area-inset-bottom) + 16px); z-index: 11000; }
+@media (min-width: 1024px) {
+  .main-tabbar { display: none !important; }
+  .global-fab { bottom: 28px; right: 28px; }
+}
+.theme-ios .main-tabbar { --f7-toolbar-height: 50px; }
+
+/* Seitenleiste Desktop */
+.side-nav .side-brand { display: flex; align-items: center; gap: 10px; padding: 18px 16px 8px; font-size: 22px; font-weight: 700; }
+.side-nav .side-brand svg { width: 34px; height: 34px; }
+.side-nav .side-group { padding: 0 16px 8px; font-size: 12px; opacity: 0.65; }
+
+/* Hero */
+.hero { background: linear-gradient(135deg, color-mix(in srgb, var(--f7-theme-color) 62%, #000), color-mix(in srgb, var(--f7-theme-color) 38%, #000)); color: #fff; border-radius: 16px; padding: 18px; margin: 16px; }
+.hero .hero-label { font-size: 14px; opacity: 0.9; }
+.hero .hero-saldo { font-size: 38px; font-weight: 700; margin: 2px 0 10px; font-variant-numeric: tabular-nums; }
+.hero .hero-row { display: flex; gap: 18px; font-size: 14px; }
+.hero .hero-row span { display: inline-flex; align-items: center; gap: 4px; }
+
+/* Balken je Kategorie */
+.pbar { height: 8px; border-radius: 4px; background: rgba(127,127,127,0.2); margin-top: 6px; overflow: hidden; }
+.pbar > i { display: block; height: 100%; background: var(--f7-theme-color); border-radius: 4px; }
+
+/* Sync */
+.sync-pill { display: flex; align-items: center; gap: 8px; margin: 8px 16px; padding: 10px 14px; border-radius: 12px; font-size: 14px; background: rgba(127,127,127,0.14); }
+.sync-pill.off { background: #fff3cd; color: #5c4400; }
+html.dark .sync-pill.off { background: #4a3a00; color: #ffe08a; }
+
+/* Typeahead */
+.ta-list { position: absolute; left: 16px; right: 16px; top: 100%; z-index: 50; margin: 0; padding: 4px 0; list-style: none; background: var(--f7-page-bg-color, #fff); border: 1px solid rgba(127,127,127,0.35); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); max-height: 220px; overflow: auto; }
+.ta-list li { min-height: 44px; display: flex; align-items: center; padding: 0 14px; cursor: pointer; }
+.ta-list li:hover, .ta-list li.hi { background: color-mix(in srgb, var(--f7-theme-color) 14%, transparent); }
+.list li.ta-root { position: relative; }
+
+.receipt-thumb { max-width: 100%; max-height: 260px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.25); }
+
+/* Farb-Auswahl */
+.accent-row { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; }
+.accent-dot { width: 44px; height: 44px; border-radius: 50%; border: 3px solid transparent; display: inline-flex; align-items: center; justify-content: center; color: #fff; padding: 0; cursor: pointer; }
+.accent-dot.sel { border-color: var(--f7-text-color, #000); box-shadow: 0 0 0 2px var(--f7-page-bg-color, #fff) inset; }
+
+/* Zoom Beleg */
+.zoom-wrap { overflow: auto; height: 100%; text-align: center; background: #222; }
+.zoom-wrap img { width: 100%; cursor: zoom-in; transition: width 0.2s; }
+.zoom-wrap img.zoomed { width: 250%; cursor: zoom-out; }
+
+
+/* PIN-Sperre */
+.lock-screen { position: fixed; inset: 0; z-index: 12000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--f7-theme-color) 80%, #fff), color-mix(in srgb, var(--f7-theme-color) 55%, #000) 70%, #06140d); padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom); user-select: none; }
+.lock-screen .lock-logo { width: 56px; height: 56px; margin-bottom: 10px; }
+.lock-screen h2 { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
+.lock-screen .lock-msg { min-height: 20px; font-size: 14px; opacity: 0.9; margin-bottom: 18px; }
+.lock-dots { display: flex; gap: 18px; margin-bottom: 30px; }
+.lock-dots i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; display: block; }
+.lock-dots i.on { background: #fff; }
+.lock-dots.shake { animation: shake 0.5s; }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-12px); } 40%,80% { transform: translateX(12px); } }
+.lock-pad { display: grid; grid-template-columns: repeat(3, 76px); gap: 16px 22px; }
+.lock-key { width: 76px; height: 76px; border-radius: 50%; border: none; background: rgba(255,255,255,0.18); backdrop-filter: blur(8px); color: #fff; font-size: 30px; font-weight: 300; line-height: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; padding: 0; font-family: inherit; }
+.lock-key small { font-size: 9px; letter-spacing: 2px; font-weight: 600; margin-top: 2px; opacity: 0.85; height: 10px; }
+.lock-key:active { background: rgba(255,255,255,0.45); }
+.lock-key.plain { background: transparent; font-size: 16px; backdrop-filter: none; }
+.lock-links { margin-top: 26px; display: flex; gap: 28px; font-size: 15px; }
+.lock-links a, .lock-links button { color: #fff; background: none; border: none; font: inherit; min-height: 44px; cursor: pointer; text-decoration: none; padding: 0 6px; }
+@media (max-height: 640px) { .lock-key { width: 62px; height: 62px; font-size: 26px; } .lock-pad { grid-template-columns: repeat(3, 62px); gap: 10px 18px; } }
+
+.about-logo { display: flex; flex-direction: column; align-items: center; padding: 28px 16px 8px; text-align: center; }
+.about-logo svg { width: 96px; height: 96px; }
+.about-logo h1 { margin: 10px 0 0; }
+.view-master-detail .page-master-detail .navbar .left .back { display: none; }
+.side-nav .side-sel, .side-nav .side-sel .item-content, .side-nav .side-sel .item-inner { background: color-mix(in srgb, var(--f7-theme-color) 18%, transparent) !important; font-weight: 700; }
+
+/* Tabbar: alle fuenf Beschriftungen muessen bei 375px vollstaendig sichtbar sein
+   (Feedback Klickdummy: "Buchungen" wurde abgeschnitten). F7-iOS gibt jedem Link 12px
+   Innenabstand + 16px Luecke – das reicht bei 5 Tabs nicht. iOS-typisch: 10px Labels. */
+.main-tabbar .toolbar-inner { gap: 0; }
+.main-tabbar .toolbar-pane { width: 100%; }
+.main-tabbar .tab-link { flex: 1 1 0; min-width: 0; padding-left: 1px !important; padding-right: 1px !important; overflow: visible; }
+.main-tabbar .tabbar-label { font-size: 10px; letter-spacing: -0.1px; overflow: visible; text-overflow: clip; max-width: none; }
+.md .main-tabbar .tabbar-label { font-size: 11px; letter-spacing: 0; }
+
+/* Sync-Status: Fehler */
+.sync-pill.err { background: #fde2e1; color: #7a1a14; }
+html.dark .sync-pill.err { background: #4a1512; color: #ffb4ab; }
+
+/* Beleg nicht ladbar */
+.receipt-missing { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; padding: 24px; }
+.zoom-wrap img { display: block; margin: 0 auto; }
+
+/* Platzhalter-Seiten (spaetere Schritte) */
+.placeholder-note { opacity: 0.85; }
+.empty-state p { opacity: 0.7; }
+
+/* Startbildschirm waehrend der Pruefung */
+.boot-screen { position: fixed; inset: 0; z-index: 12000; display: flex; align-items: center; justify-content: center; background: var(--f7-page-bg-color, #fff); }
+.boot-screen .lock-logo { width: 64px; height: 64px; opacity: 0.8; }
+
+/* Hinweis "neue Version bereit" */
+.update-banner { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 8px); z-index: 13000; display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; border-radius: 14px; background: var(--f7-bars-bg-color, #fff); color: var(--f7-text-color, #000); box-shadow: 0 4px 18px rgba(0,0,0,0.25); font-size: 14px; max-width: calc(100% - 24px); }
+
+/* PIN vergessen / Nicht eingerichtet (auf dem Sperrbildschirm) */
+.lock-form { width: min(340px, calc(100% - 40px)); display: flex; flex-direction: column; gap: 10px; text-align: left; }
+.lock-form h2 { text-align: center; }
+.lock-form label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.lock-form input { user-select: text; height: 44px; border-radius: 10px; border: none; padding: 0 12px; font-size: 18px; background: rgba(255,255,255,0.92); color: #111; }
+.lock-text { font-size: 14px; line-height: 1.4; margin: 0; opacity: 0.95; }
+.lock-hint { font-size: 12px; line-height: 1.4; opacity: 0.8; margin: 8px 0 0; }
+.lock-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 6px; }
+.lock-btn { min-height: 44px; padding: 0 18px; border-radius: 22px; border: none; background: #fff; color: #0c3b26; font: inherit; font-weight: 600; cursor: pointer; }
+.lock-btn.plain { background: transparent; color: #fff; }
+.lock-btn:disabled, .lock-key:disabled { opacity: 0.5; cursor: default; }
+.lock-code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 22px; letter-spacing: 2px; text-align: center; padding: 14px; border-radius: 12px; background: rgba(255,255,255,0.92); color: #111; user-select: all; word-break: break-all; }
+.button > i.icon:not(:only-child) { margin-inline-end: 6px; }
+
+/* Hilfe-/Infotexte: Zeilenumbrueche aus den Sprachdateien uebernehmen */
+.help-text { white-space: pre-line; line-height: 1.45; }
+.hint-small { font-size: 13px; opacity: 0.7; margin: 8px 0 0; }
+.lock-link { color: #fff; text-decoration: underline; }
+
+/* Update-Hinweis: dezenter Punkt an Einstellungen > Update bzw. am Tab */
+.update-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--f7-theme-color); display: inline-block; margin-left: 8px; align-self: center; }
+.main-tabbar .tab-link.has-dot { position: relative; }
+.main-tabbar .tab-link.has-dot::after { content: ''; position: absolute; top: 4px; left: calc(50% + 8px); width: 9px; height: 9px; border-radius: 50%; background: #e53935; }
+
+/* Protokoll */
+.log-list .item-title { white-space: normal; word-break: break-word; }
+.log-list .log-error .item-media i { color: #e53935; }
+.log-list .log-warning .item-media i { color: #f59e0b; }
+.log-ctx { margin-top: 4px; }
+.log-ctx pre { font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 11.5px; white-space: pre-wrap; word-break: break-all; margin: 6px 0 0; }
+
+/* Langer Gruppenname im Titel kuerzen (iOS: darf den "?"-Knopf nicht ueberlappen) */
+.navbar .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ios .navbar .title { max-width: calc(100vw - 150px); }
+.md .navbar .title { max-width: calc(100vw - 170px); }
+
+/* Beleg-Flow */
+.rec-progress { padding: 24px 16px; }
+.pos-card.skipped { opacity: 0.55; }
+.pos-card .card-header { display: flex; justify-content: space-between; align-items: center; }
+.discount-line { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 8px 16px; }
+.button.disabled { opacity: 0.5; pointer-events: none; }
+
+/* Sync-Icon in der Navbar (Uebersicht) */
+.sync-icon-wrap { display: inline-flex; }
+.sync-icon { position: relative; }
+.sync-icon.st-synced { color: var(--f7-theme-color); }
+.sync-icon.st-offline, .sync-icon.st-error { color: #b26a00; }
+html.dark .sync-icon.st-offline, html.dark .sync-icon.st-error { color: #ffc766; }
+.sync-icon.st-syncing .arrows { transform-origin: 12px 13px; animation: sync-spin 1.2s linear infinite; }
+@keyframes sync-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .sync-icon.st-syncing .arrows { animation: none; } }
+.sync-badge { position: absolute; top: 4px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: #d93025; color: #fff; font-size: 10px; font-weight: 700; line-height: 16px; text-align: center; box-sizing: border-box; }
+.sync-sheet { text-align: center; }
+.sync-sheet h3 { margin: 4px 0 8px; font-size: 17px; }
+.sync-sheet .sync-last { opacity: 0.7; font-size: 13px; }
+.sync-sheet .button { margin-top: 8px; }

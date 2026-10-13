@@ -1,0 +1,12 @@
+# Quitt auf Synology / Docker Compose. Port links aendern, falls 8080 belegt ist.
+services:
+  quitt:
+    image: ghcr.io/rilnaista/quitt-kassenbuch:latest
+    container_name: quitt
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./quitt-data:/data
+    environment:
+      TZ: Europe/Berlin
