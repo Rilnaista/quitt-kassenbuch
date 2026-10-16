@@ -1,5 +1,6 @@
 <template>
   <f7-app v-bind="f7params">
+    <DemoBanner />
     <f7-panel left cover :visible-breakpoint="1024" class="side-nav">
       <f7-page>
         <div class="side-brand"><Logo style="width:34px;height:34px" /> Quitt</div>
@@ -56,6 +57,7 @@ import Logo from './components/Logo.vue';
 import Lock from './components/Lock.vue';
 import NotInstalled from './components/NotInstalled.vue';
 import HelpPopup from './components/HelpPopup.vue';
+import DemoBanner from './components/DemoBanner.vue';
 import { useUpdate } from './stores/update.js';
 import routes from './routes.js';
 import * as api from './api/index.js';

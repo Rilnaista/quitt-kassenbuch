@@ -143,5 +143,8 @@
     "not_installed": "Quitt ist noch nicht eingerichtet.",
     "server_error": "Auf dem Server ist ein Fehler aufgetreten.",
     "unknown": "Etwas ist schiefgelaufen. Bitte versuch es noch einmal."
+  },
+  "demo": {
+    "banner": "Demo: Quitt wird zu jeder vollen Stunde zurückgesetzt. Bitte lade keine vertraulichen Belege hoch."
   }
 }
