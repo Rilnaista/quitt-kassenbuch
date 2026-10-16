@@ -12,6 +12,7 @@
     "build": "vite build",
     "preview": "vite preview --host --port 4173",
     "test": "vitest run",
+    "ocr:eval": "node scripts/ocr-eval.mjs",
     "e2e:ui": "node ../scripts/e2e-ui.mjs",
     "icons": "node scripts/gen-icons.mjs"
   },

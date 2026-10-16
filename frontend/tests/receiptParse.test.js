@@ -114,3 +114,57 @@ describe('Positionen', () => {
     expect(parseReceiptText('Vielen Dank\nBis bald').positions).toEqual([]);
   });
 });
+
+describe('Parser: OCR-Toleranz (generische Regeln)', () => {
+  const P = (t) => parseReceiptText(t);
+
+  it('Name in der Zeile davor, Mengenzeile mit beliebiger Einheit ("2 Kst x 8,99 17,98 A")', () => {
+    const r = P('Apfelschorle 12x0,7 l\n2 Kst x 8,99 17,98 A\nPfand Kasten\n4 Stk x 1,50 6,00 A\nSUMME EUR 23,98');
+    expect(r.positions).toEqual([{ item: 'Apfelschorle 12x0,7 l', amount_cents: 1798 }, { item: 'Pfand Kasten', amount_cents: 600 }]);
+    expect(r.total_cents).toBe(2398);
+  });
+
+  it('Betrag unlesbar: Menge x Einzelpreis einsetzen', () => {
+    const r = P('Transparentpapier bunt\n10 Stk x 1,95 19,594 |\nSUMME EUR 19,50');
+    expect(r.positions).toEqual([{ item: 'Transparentpapier bunt', amount_cents: 1950 }]);
+  });
+
+  it('Stoerfetzen links/rechts neben dem Bon werden verworfen', () => {
+    const r = P('EEE Laugenbrezel EEE\nEEE 40 Stk x 0,85 34,00 B SE\nButterbrezel\n6 Stk x 1,20 7,20 B | ES\nSUMME EUR 41,20 5');
+    expect(r.positions.map((p) => p.amount_cents)).toEqual([3400, 720]);
+    expect(r.positions[0].item).toBe('Laugenbrezel');
+    expect(r.total_cents).toBe(4120);
+  });
+
+  it('Artikel mit "tel"/"bar" im Wort ist keine Kopfzeile (Frischhaltebeutel 50er 2,29 A)', () => {
+    expect(P('Frischhaltebeutel 50er 2,29 A\nSUMME 2,29').positions).toEqual([{ item: 'Frischhaltebeutel 50er', amount_cents: 229 }]);
+    expect(P('Barista Milch 1,29\nSUMME 1,29').positions).toHaveLength(1);
+  });
+
+  it('Ziffern-Verwechslungen O/l in Betraegen und Datum', () => {
+    const r = P('Kaffee 1O,5O A\nMilch l,99\nSUMME 12,49\n1O.O9.2O26');
+    expect(r.positions.map((p) => p.amount_cents)).toEqual([1050, 199]);
+    expect(r.date).toBe('2026-09-10');
+  });
+
+  it('Summe steht allein ueber dem Wort SUMME', () => {
+    expect(P('Brot 2,50 A\n2,50\nSUMME EUR\nZahlart: BAR').total_cents).toBe(250);
+  });
+
+  it('Zahlungs-, Steuer- und TSE-Zeilen sind keine Positionen', () => {
+    const r = P('Brot 2,50 A\nSUMME EUR 2,50\nZahlart: BAR\nGegeben bar 5,00\nRückgeld 2,50\nSatz Netto MwSt Brutto\nA 19% 2,10 0,40 2,50');
+    expect(r.positions).toHaveLength(1);
+  });
+
+  it('Datumsformate: Monatsname, zweistelliges Jahr, TSE-Zeitstempel zaehlt nicht vor dem Belegdatum', () => {
+    expect(findDates('am 2. Okt 2026')).toEqual(['2026-10-02']);
+    expect(findDates('3. März 26')).toEqual(['2026-03-03']);
+    expect(P('Start: 2026-10-02T15:18:28\nDatum 05.10.2026').date).toBe('2026-10-05');
+  });
+
+  it('Wechselgeld-/Zahlungszeilen (Zurück, EC, Karte) sind keine Positionen, Rabatte bleiben', () => {
+    const r = P('Korb 20x14cm 1,99 A\nTotal EUR 1,99\nGegeben EUR 5,00\n1 Zurück EUR -3,01\nEC 1,99\nKarte 1,99');
+    expect(r.positions).toEqual([{ item: 'Korb 20x14cm', amount_cents: 199 }]);
+    expect(P('Kaffee 4,99\nRabatt -0,50').positions.map((x) => x.amount_cents)).toEqual([499, -50]);
+  });
+});
