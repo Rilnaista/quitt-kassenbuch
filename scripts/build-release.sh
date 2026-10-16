@@ -49,11 +49,15 @@ else
   (
     cd "$ROOT/frontend"
     [[ -d node_modules ]] || npm ci --no-audit --no-fund
+    node scripts/copy-ocr.mjs   # npx vite build ueberspringt das npm-prebuild -> OCR-Dateien selbst kopieren
     npx vite build --outDir "$WORK/frontend" --emptyOutDir
   )
   cp -R "$WORK/frontend"/. "$PKG"/
 fi
 [[ -f "$PKG/index.html" ]] || { echo "Frontend-Build ohne index.html" >&2; exit 1; }
+for f in worker.min.js tesseract-core-lstm.wasm.js tesseract-core-simd-lstm.wasm.js tesseract-core-relaxedsimd-lstm.wasm.js deu.traineddata.gz; do
+  [[ -s "$PKG/ocr/$f" ]] || { echo "Frontend-Build ohne ocr/$f (lokale Texterkennung)" >&2; exit 1; }
+done
 
 # --- 2. Backend -> app/ ------------------------------------------------------
 echo "-- Backend kopieren"
